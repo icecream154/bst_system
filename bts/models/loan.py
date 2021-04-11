@@ -22,17 +22,17 @@ class LoanRecord(models.Model):
     # 剩余罚金
     left_fine = models.FloatField()
     # 贷款时间
-    created_time = models.DateTimeField(default=timezone.now)
+    created_time = models.DateField(default=timezone.now)
 
     def to_dict(self):
         dictionary = {
             'loan_record_id': self.loan_record_id,
             'customer_id': self.customer.customer_id,
-            'created_time': self.created_time,
+            'created_time': self.created_time.strftime('%Y-%m-%d'),
             'payment': self.payment,
             'repay_cycle': self.repay_cycle,
-            'due_date': self.due_date,
-            'next_overdue_date': self.next_overdue_date,
+            'due_date': self.due_date.strftime('%Y-%m-%d'),
+            'next_overdue_date': self.next_overdue_date.strftime('%Y-%m-%d'),
             'left_payment': self.left_payment,
             'left_fine': self.left_fine,
         }
@@ -51,7 +51,7 @@ class LoanRepay(models.Model):
     # 当前还款金额
     repay = models.FloatField()
     # 还款时间
-    repay_time = models.DateTimeField(default=timezone.now)
+    repay_time = models.DateField(default=timezone.now)
 
     def to_dict(self):
         dictionary = {
@@ -60,6 +60,6 @@ class LoanRepay(models.Model):
             'left_payment_before': self.left_payment_before,
             'left_fine_before': self.left_fine_before,
             'repay': self.repay,
-            'repay_time': self.repay_time,
+            'repay_time': self.repay_time.strftime('%Y-%m-%d'),
         }
         return dictionary

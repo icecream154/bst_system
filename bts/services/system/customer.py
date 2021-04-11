@@ -26,7 +26,7 @@ def add_customer(request):
     except Customer.DoesNotExist:
         new_customer = Customer(name=name, phone=phone, id_number=id_number,
                                 deposit=deposit,
-                                bank_teller_id=bank_teller)
+                                bank_teller=bank_teller)
         new_customer.save()
         response_data = {'msg': 'add new customer success', 'customer_id': new_customer.customer_id}
         return HttpResponse(json.dumps(response_data))

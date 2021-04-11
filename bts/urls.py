@@ -28,7 +28,7 @@ urlpatterns = [
 
     # --贷款模块--
     # 客户贷款
-    path('loan', loan.loan, name='loan'),
+    path('loan/request_loan', loan.request_loan, name='request_loan'),
     # 通过客户ID查询客户贷款记录
     path('loan/query_loan_record', loan.query_loan_record_by_customer_id,
          name='query_loan_record_by_customer_id'),

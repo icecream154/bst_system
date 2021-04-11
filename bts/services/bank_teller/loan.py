@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseForbidden
 
@@ -10,7 +10,7 @@ from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_K
 
 def _calculate_fine(loan_record: LoanRecord):
     updated = False
-    while loan_record.next_overdue_date <= datetime.now():
+    while loan_record.next_overdue_date <= date.today():
         loan_record.left_fine += 0.05 * loan_record.left_payment
         loan_record.next_overdue_date += timedelta(days=loan_record.repay_cycle)
         updated = True
@@ -19,14 +19,19 @@ def _calculate_fine(loan_record: LoanRecord):
         loan_record.save()
 
 
-def loan(request):
+def request_loan(request):
     if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
         customer_id = int(request.POST['customer_id'])
+        # print(request.POST['customer_id'])
         payment = float(request.POST['payment'])
+        # print(request.POST['payment'])
         repay_cycle = int(request.POST['repay_cycle'])
+        # print(request.POST['repay_cycle'])
+        created_time = datetime.strptime(request.POST['created_time'], '%Y-%m-%d')
+        # print(request.POST['created_time'])
         customer = Customer.objects.get(customer_id=customer_id)
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -41,9 +46,9 @@ def loan(request):
 
     new_loan_record = LoanRecord(customer=customer, payment=payment,
                                  repay_cycle=repay_cycle,
-                                 due_date=datetime.now() + timedelta(days=repay_cycle),
-                                 next_overdue_date=datetime.now() + timedelta(days=repay_cycle),
-                                 left_payment=payment, left_fine=0)
+                                 due_date=datetime.today() + timedelta(days=repay_cycle),
+                                 next_overdue_date=datetime.today() + timedelta(days=repay_cycle),
+                                 left_payment=payment, left_fine=0.0, created_time=created_time)
     new_loan_record.save()
     response_data = {'msg': 'loan request success'}
     return HttpResponse(json.dumps(response_data))
@@ -59,11 +64,11 @@ def query_loan_record_by_customer_id(request):
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
-    customer_load_record_list = list(LoanRecord.objects.filter(customer=customer))
+    print('[before query loan record]')
     response_data = []
-    for loan_record in customer_load_record_list:
+    for loan_record in customer.loanrecord_set.all():
         _calculate_fine(loan_record)
-        response_data.add(loan_record.to_dict())
+        response_data.append(loan_record.to_dict())
 
     return HttpResponse(json.dumps(response_data))
 

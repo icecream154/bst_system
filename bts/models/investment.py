@@ -28,8 +28,8 @@ class FundInvestment(models.Model):
             'fund_id': self.fund.fund_id,
             'position_share': self.position_share,
             'purchase_amount': self.purchase_amount,
-            'purchase_date': self.purchase_date,
-            'due_date': self.due_date
+            'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
+            'due_date': self.due_date.strftime('%Y-%m-%d')
         }
         return dictionary
 
@@ -55,7 +55,7 @@ class StockInvestment(models.Model):
             'stock_id': self.stock.stock_id,
             'position_share': self.position_share,
             'cumulative_purchase_amount': self.cumulative_purchase_amount,
-            'purchase_date': self.purchase_date
+            'purchase_date': self.purchase_dat.strftime('%Y-%m-%d')
         }
         return dictionary
 
@@ -80,8 +80,8 @@ class RegularDepositInvestment(models.Model):
             'customer_id': self.customer.customer_id,
             'regular_deposit_id': self.regular_deposit.regular_deposit_id,
             'purchase_amount': self.purchase_amount,
-            'purchase_date': self.purchase_date,
-            'due_date': self.due_date
+            'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
+            'due_date': self.due_date.strftime('%Y-%m-%d')
         }
         return dictionary
 

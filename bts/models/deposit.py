@@ -10,7 +10,7 @@ class DepositRecord(models.Model):
     # 客户ID
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     # 存款时间
-    created_time = models.DateTimeField(default=timezone.now)
+    created_time = models.DateField(default=timezone.now)
     # 存款金额
     payment = models.FloatField()
 
@@ -19,7 +19,7 @@ class DepositRecord(models.Model):
             'record_id': self.record_id,
             'customer_id': self.customer.customer_id,
             'customer_id_number': self.customer.id_number,
-            'created_time': self.created_time,
+            'created_time': self.created_time.strftime('%Y-%m-%d'),
             'payment': self.payment
         }
         return dictionary

@@ -10,7 +10,7 @@ TOKEN_HEADER_KEY = 'HTTP_TOKEN'
 
 
 def _get_token_by_id(token_dictionary: {str: (BankTeller, float)}, bank_teller_id: int):
-    return [k for k, v in token_dictionary.items() if v[0].bank_teller == bank_teller_id]
+    return [k for k, v in token_dictionary.items() if v[0].bank_teller_id == bank_teller_id]
 
 
 def _generate_token_string(bank_teller: BankTeller):
