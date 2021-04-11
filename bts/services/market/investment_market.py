@@ -50,36 +50,32 @@ def _get_random_fluctuation(fluctuation_range: float = 0.05):
     return (random.random() - 0.5) * 2 * fluctuation_range
 
 
-def _get_fund_price(fund_id: int, search_date):
+def _get_fund_price(fund: Fund, search_date):
     try:
-        if Fund.objects.get(fund_id=fund_id).issue_date <= search_date:
-            price_record = FundPriceRecord.objects.get(fund_id=fund_id, record_date=search_date)
+        if fund.issue_date <= search_date:
+            price_record = FundPriceRecord.objects.get(fund=fund, record_date=search_date)
             return price_record.price
         else:
             return None
-    except Fund.DoesNotExist:
-        return None
     except FundPriceRecord.DoesNotExist:
-        last_price = _get_fund_price(fund_id, search_date - timedelta(days=1))
-        price = last_price * _get_random_fluctuation()
-        FundPriceRecord(fund_id=fund_id, record_date=search_date,
+        last_price = _get_fund_price(fund, search_date - timedelta(days=1))
+        price = last_price * (1 + _get_random_fluctuation())
+        FundPriceRecord(fund=fund, record_date=search_date,
                         price=price).save()
         return price
 
 
-def _get_stock_price(stock_id: int, search_date):
+def _get_stock_price(stock: Stock, search_date):
     try:
-        if Stock.objects.get(stock_id=stock_id).issue_date <= search_date:
-            price_record = StockPriceRecord.objects.get(stock_id=stock_id, record_date=search_date)
+        if stock.issue_date <= search_date:
+            price_record = StockPriceRecord.objects.get(stock=stock, record_date=search_date)
             return price_record.price
         else:
             return None
-    except Stock.DoesNotExist:
-        return None
     except StockPriceRecord.DoesNotExist:
-        last_price = _get_stock_price(stock_id, search_date - timedelta(days=1))
-        price = last_price * _get_random_fluctuation(0.1)
-        StockPriceRecord(stock_id=stock_id, record_date=search_date,
+        last_price = _get_stock_price(stock, search_date - timedelta(days=1))
+        price = last_price * (1 + _get_random_fluctuation(0.1))
+        StockPriceRecord(stock=stock, record_date=search_date,
                          price=price).save()
         return price
 
@@ -88,13 +84,14 @@ def get_fund_price(request):
     try:
         fund_id = int(request.GET['fund_id'])
         search_date = datetime.strptime(request.GET['search_date'], '%Y-%m-%d')
-    except (KeyError, ValueError, TypeError):
+        fund = Fund.objects.get(fund_id=fund_id)
+    except (KeyError, ValueError, TypeError, Fund.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
     except Exception as ex:
         print(ex)
         return HttpResponseBadRequest('invalid parameter')
 
-    response_data = {'price': _get_fund_price(fund_id, search_date)}
+    response_data = {'price': _get_fund_price(fund, search_date)}
     if not response_data['price']:
         return HttpResponseBadRequest('invalid parameter')
     return HttpResponse(json.dumps(response_data))
@@ -104,13 +101,14 @@ def get_stock_price(request):
     try:
         stock_id = int(request.GET['stock_id'])
         search_date = datetime.strptime(request.GET['search_date'], '%Y-%m-%d')
-    except (KeyError, ValueError, TypeError):
+        stock = Stock.objects.get(stock_id=stock_id)
+    except (KeyError, ValueError, TypeError, Stock.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
     except Exception as ex:
         print(ex)
         return HttpResponseBadRequest('invalid parameter')
 
-    response_data = {'price': _get_stock_price(stock_id, search_date)}
+    response_data = {'price': _get_stock_price(stock, search_date)}
     if not response_data['price']:
         return HttpResponseBadRequest('invalid parameter')
     return HttpResponse(json.dumps(response_data))

@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 
 from bts.models.customer import Customer
+from bts.models.deposit import DepositRecord
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
 
@@ -22,6 +23,7 @@ def customer_deposit(request):
     try:
         customer = Customer.objects.get(customer_id=customer_id)
         customer.deposit += new_deposit
+        DepositRecord(customer=customer, payment=new_deposit).save()
         customer.save()
         response_data = {'msg': 'customer deposit success'}
         return HttpResponse(json.dumps(response_data))

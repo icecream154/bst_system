@@ -8,7 +8,7 @@ class LoanRecord(models.Model):
     # 贷款记录ID
     loan_record_id = models.AutoField(primary_key=True)
     # 客户ID
-    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     # 贷款金额
     payment = models.FloatField()
     # 还款周期(天数)
@@ -27,7 +27,7 @@ class LoanRecord(models.Model):
     def to_dict(self):
         dictionary = {
             'loan_record_id': self.loan_record_id,
-            'customer_id': self.customer_id,
+            'customer_id': self.customer.customer_id,
             'created_time': self.created_time,
             'payment': self.payment,
             'repay_cycle': self.repay_cycle,
@@ -42,8 +42,8 @@ class LoanRecord(models.Model):
 class LoanRepay(models.Model):
     # 贷款还款记录ID
     repay_id = models.AutoField(primary_key=True)
-    # 对应贷款记录ID
-    loan_record_id = models.ForeignKey(LoanRecord, on_delete=models.CASCADE)
+    # 对应贷款记录
+    loan_record = models.ForeignKey(LoanRecord, on_delete=models.CASCADE)
     # 还款前剩余还款金额
     left_payment_before = models.FloatField()
     # 还款前剩余罚金
@@ -56,7 +56,7 @@ class LoanRepay(models.Model):
     def to_dict(self):
         dictionary = {
             'repay_id': self.repay_id,
-            'loan_record_id': self.loan_record_id,
+            'loan_record_id': self.loan_record.loan_record_id,
             'left_payment_before': self.left_payment_before,
             'left_fine_before': self.left_fine_before,
             'repay': self.repay,

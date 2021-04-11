@@ -15,7 +15,7 @@ class Customer(models.Model):
     # 账户余额
     deposit = models.FloatField()
     # 开户柜员
-    bank_teller_id = models.ForeignKey(BankTeller, on_delete=models.CASCADE)
+    bank_teller = models.ForeignKey(BankTeller, on_delete=models.CASCADE)
 
     def to_dict(self):
         dictionary = {
@@ -24,6 +24,6 @@ class Customer(models.Model):
             'phone': self.phone,
             'id_number': self.id_number,
             'deposit': self.deposit,
-            'bank_teller_id': self.bank_teller_id
+            'bank_teller_id': self.bank_teller.bank_teller_id
         }
         return dictionary

@@ -23,9 +23,9 @@ class Credit:
 
 
 def _get_customer_credit(customer: Customer):
-    total_left_payment = LoanRecord.objects.filter(customer_id=customer.customer_id) \
+    total_left_payment = LoanRecord.objects.filter(customer=customer) \
         .aggregates(total_left_payment=Sum('left_payment'))['total_left_payment']
-    total_left_fine = LoanRecord.objects.filter(customer_id=customer.customer_id) \
+    total_left_fine = LoanRecord.objects.filter(customer=customer) \
         .aggregates(total_left_fine=Sum('left_fine'))['total_left_fine']
 
     credit_info = {
@@ -62,12 +62,12 @@ def get_customer_credit(request):
 
 
 def _fine_repay(customer: Customer):
-    total_left_fine = LoanRecord.objects.filter(customer_id=customer.customer_id) \
+    total_left_fine = LoanRecord.objects.filter(customer=customer) \
         .aggregates(total_left_fine=Sum('left_fine'))['total_left_fine']
     if customer.deposit >= total_left_fine:
         customer.deposit -= total_left_fine
         customer.save()
-        loan_records = LoanRecord.objects.filter(customer_id=customer.customer_id)
+        loan_records = LoanRecord.objects.filter(customer=customer)
         for loan_record in loan_records:
             if loan_record.left_fine > 0.0:
                 _loan_repay(loan_record, loan_record.left_fine)
@@ -103,7 +103,7 @@ def buy_regular_deposit(request):
 
     customer.deposit -= purchase_amount
     customer.save()
-    RegularDepositInvestment(customer_id=customer_id, regular_deposit_id=regular_deposit_id,
+    RegularDepositInvestment(customer=customer, regular_deposit=regular_deposit,
                              purchase_date=purchase_date,
                              due_date=purchase_date + timedelta(days=regular_deposit.return_cycle),
                              purchase_amount=purchase_amount).save()
@@ -126,7 +126,7 @@ def buy_fund(request):
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
-        Fund.objects.get(fund_id=fund_id)
+        fund = Fund.objects.get(fund_id=fund_id)
     except Customer.DoesNotExist:
         raise Http404('No such customer')
     except Fund.DoesNotExist:
@@ -139,11 +139,11 @@ def buy_fund(request):
     if _get_customer_credit(customer)['credit_level'] > Credit.Credit_Secondary_Account:
         return HttpResponseForbidden('credit level forbidden')
 
-    fund_price = _get_fund_price(fund_id, purchase_date)
+    fund_price = _get_fund_price(fund, purchase_date)
     if not fund_price:
         return HttpResponseForbidden('invalid purchase')
 
-    fund_investment = FundInvestment(customer_id=customer_id, fund_id=fund_id,
+    fund_investment = FundInvestment(customer=customer, fund=fund,
                                      position_share=purchase_amount / fund_price,
                                      cumulative_purchase_amount=purchase_amount,
                                      purchase_date=purchase_date,
@@ -170,7 +170,7 @@ def buy_stock(request):
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
-        Stock.objects.get(stock_id=stock_id)
+        stock = Stock.objects.get(stock_id=stock_id)
     except Customer.DoesNotExist:
         raise Http404('No such customer')
     except Stock.DoesNotExist:
@@ -178,7 +178,7 @@ def buy_stock(request):
 
     if not _fine_repay(customer):
         return HttpResponseForbidden('cannot pay fine')
-    stock_price = _get_stock_price(stock_id, purchase_date)
+    stock_price = _get_stock_price(stock, purchase_date)
     if not stock_price:
         return HttpResponseForbidden('invalid purchase')
     purchase_amount = stock_price * new_position_share
@@ -188,11 +188,11 @@ def buy_stock(request):
         return HttpResponseForbidden('credit level forbidden')
 
     try:
-        stock_investment = StockInvestment.objects.get(customer_id=customer_id, stock_id=stock_id)
+        stock_investment = StockInvestment.objects.get(customer=customer, stock=stock)
         stock_investment.cumulative_purchase_amount += purchase_amount
         stock_investment.position_share += new_position_share
     except StockInvestment.DoesNotExist:
-        stock_investment = StockInvestment(customer_id=customer_id, stock_id=stock_id,
+        stock_investment = StockInvestment(customer=customer, stock=stock,
                                            position_share=new_position_share,
                                            purchase_date=purchase_date,
                                            cumulative_purchase_amount=purchase_amount)

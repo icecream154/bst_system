@@ -26,9 +26,9 @@ def add_customer(request):
     except Customer.DoesNotExist:
         new_customer = Customer(name=name, phone=phone, id_number=id_number,
                                 deposit=deposit,
-                                bank_teller_id=bank_teller.bank_teller_id)
+                                bank_teller_id=bank_teller)
         new_customer.save()
-        response_data = {'msg': 'add new customer success'}
+        response_data = {'msg': 'add new customer success', 'customer_id': new_customer.customer_id}
         return HttpResponse(json.dumps(response_data))
 
 
@@ -39,5 +39,7 @@ def query_customer_by_id_number(request):
     try:
         customer = Customer.objects.get(id_number=request.GET['id_number'])
         return HttpResponse(json.dumps(customer.to_dict()))
+    except (KeyError, ValueError, TypeError):
+        return HttpResponseBadRequest('parameter missing or invalid parameter')
     except Customer.DoesNotExist:
         raise Http404('No such customer')

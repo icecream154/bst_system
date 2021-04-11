@@ -66,12 +66,28 @@ class RegularDeposit(models.Model):
 
 
 class FundPriceRecord(models.Model):
-    fund_id = models.ForeignKey(Fund, on_delete=models.CASCADE)
+    fund = models.ForeignKey(Fund, on_delete=models.CASCADE)
     record_date = models.DateField()
     price = models.FloatField()
+
+    def to_dict(self):
+        dictionary = {
+            'fund_id': self.fund.fund_id,
+            'record_date': self.record_date,
+            'price': self.price
+        }
+        return dictionary
 
 
 class StockPriceRecord(models.Model):
-    stock_id = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     record_date = models.DateField()
     price = models.FloatField()
+
+    def to_dict(self):
+        dictionary = {
+            'stock_id': self.stock.stock_id,
+            'record_date': self.record_date,
+            'price': self.price
+        }
+        return dictionary
