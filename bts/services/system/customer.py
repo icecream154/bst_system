@@ -3,11 +3,11 @@ import json
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 
 from bts.models.customer import Customer
-from bts.services.system.token import fetch_bank_teller_by_token
+from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
 
 def add_customer(request):
-    bank_teller = fetch_bank_teller_by_token(request.META['token'])
+    bank_teller = fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY])
     if not bank_teller:
         return HttpResponse(content='Unauthorized', status=401)
     # TODO: 未做参数校验
@@ -33,7 +33,7 @@ def add_customer(request):
 
 
 def query_customer_by_id_number(request):
-    bank_teller = fetch_bank_teller_by_token(request.META['token'])
+    bank_teller = fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY])
     if not bank_teller:
         return HttpResponse(content='Unauthorized', status=401)
     try:

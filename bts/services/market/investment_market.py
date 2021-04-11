@@ -5,7 +5,7 @@ from datetime import timedelta, datetime
 from django.http import HttpResponseBadRequest, HttpResponse, Http404
 
 from bts.models.products import FundPriceRecord, StockPriceRecord, Fund, Stock, RegularDeposit
-from bts.services.system.token import fetch_bank_teller_by_token
+from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
 
 def _query_products(query_id: int, product_cls):
@@ -117,7 +117,7 @@ def get_stock_price(request):
 
 
 def issue_fund(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
     try:
         fund_name = request.POST['fund_name']
@@ -135,7 +135,7 @@ def issue_fund(request):
 
 
 def issue_stock(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
     try:
         stock_name = request.POST['stock_name']
@@ -153,7 +153,7 @@ def issue_stock(request):
 
 
 def issue_regular_deposit(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
     try:
         regular_deposit_name = request.POST['regular_deposit_name']

@@ -5,11 +5,11 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from bts.models.investment import FundInvestment, StockInvestment, RegularDepositInvestment
 from bts.models.products import RegularDeposit
 from bts.services.market.investment_market import _get_fund_price, _get_stock_price
-from bts.services.system.token import fetch_bank_teller_by_token
+from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
 
 def query_customer_fund_invest(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
@@ -30,7 +30,7 @@ def query_customer_fund_invest(request):
 
 
 def query_customer_stock_invest(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
@@ -51,7 +51,7 @@ def query_customer_stock_invest(request):
 
 
 def query_customer_regular_deposit_invest(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:

@@ -5,7 +5,7 @@ from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpRespo
 
 from bts.models.customer import Customer
 from bts.models.loan import LoanRecord, LoanRepay
-from bts.services.system.token import fetch_bank_teller_by_token
+from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
 
 def _calculate_fine(loan_record: LoanRecord):
@@ -20,7 +20,7 @@ def _calculate_fine(loan_record: LoanRecord):
 
 
 def loan(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
@@ -49,7 +49,7 @@ def loan(request):
 
 
 def query_loan_record_by_customer_id(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
@@ -84,7 +84,7 @@ def _loan_repay(loan_record: LoanRecord, repay):
 
 
 def loan_repay(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
@@ -109,7 +109,7 @@ def loan_repay(request):
 
 
 def auto_repay_process(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     load_record_query_set = LoanRecord.objects.all()

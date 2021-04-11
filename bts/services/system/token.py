@@ -6,6 +6,7 @@ from bts.models.bank_teller import BankTeller
 token_dict = {}
 # default expire time set to 10800 seconds (3 hour)
 _EXPIRE_TIME = 10800
+TOKEN_HEADER_KEY = 'HTTP_TOKEN'
 
 
 def _get_token_by_id(token_dictionary: {str: (BankTeller, float)}, bank_teller_id: int):
@@ -13,7 +14,7 @@ def _get_token_by_id(token_dictionary: {str: (BankTeller, float)}, bank_teller_i
 
 
 def _generate_token_string(bank_teller: BankTeller):
-    return "fake token " + str(bank_teller)
+    return "fakeToken" + str(bank_teller.account)
 
 
 def update_token(bank_teller: BankTeller):

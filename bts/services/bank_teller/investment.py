@@ -10,7 +10,7 @@ from bts.models.loan import LoanRecord
 from bts.models.products import RegularDeposit, Fund, Stock
 from bts.services.bank_teller.loan import _loan_repay
 from bts.services.market.investment_market import _get_fund_price, _get_stock_price
-from bts.services.system.token import fetch_bank_teller_by_token
+from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
 
 class Credit:
@@ -45,7 +45,7 @@ def _get_customer_credit(customer: Customer):
 
 
 def get_customer_credit(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
@@ -77,7 +77,7 @@ def _fine_repay(customer: Customer):
 
 
 def buy_regular_deposit(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
@@ -112,7 +112,7 @@ def buy_regular_deposit(request):
 
 
 def buy_fund(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
@@ -157,7 +157,7 @@ def buy_fund(request):
 
 
 def buy_stock(request):
-    if not fetch_bank_teller_by_token(request.META['token']):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
