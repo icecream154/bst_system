@@ -16,17 +16,20 @@ class FundInvestment(models.Model):
     # 持仓份额
     position_share = models.FloatField()
     # 累计买入金额
-    cumulative_purchase_amount = models.FloatField()
-    # 最早买入时间
-    purchase_date = models.DateTimeField(default=timezone.now)
+    purchase_amount = models.FloatField()
+    # 买入时间
+    purchase_date = models.DateField(default=timezone.now)
+    # 到期时间
+    due_date = models.DateField()
 
     def to_dict(self):
         dictionary = {
             'customer_id': self.customer_id,
             'fund_id': self.fund_id,
             'position_share': self.position_share,
-            'cumulative_purchase_amount': self.cumulative_purchase_amount,
-            'purchase_date': self.purchase_date
+            'purchase_amount': self.purchase_amount,
+            'purchase_date': self.purchase_date,
+            'due_date': self.due_date
         }
         return dictionary
 
@@ -44,7 +47,7 @@ class StockInvestment(models.Model):
     # 累计买入金额
     cumulative_purchase_amount = models.FloatField()
     # 最早买入时间
-    purchase_date = models.DateTimeField(default=timezone.now)
+    purchase_date = models.DateField(default=timezone.now)
 
     def to_dict(self):
         dictionary = {
@@ -68,7 +71,7 @@ class RegularDepositInvestment(models.Model):
     # 买入金额
     purchase_amount = models.FloatField()
     # 买入时间
-    purchase_date = models.DateTimeField(default=timezone.now)
+    purchase_date = models.DateField(default=timezone.now)
     # 到期时间
     due_date = models.DateField()
 

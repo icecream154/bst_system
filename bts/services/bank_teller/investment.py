@@ -14,9 +14,9 @@ from bts.services.system.token import fetch_bank_teller_by_token
 
 
 class Credit:
-    Credit_Primary_Account = 1          # 一级账户
-    Credit_Secondary_Account = 2        # 二级账户
-    Credit_Third_Level_Account = 3      # 三级账户
+    Credit_Primary_Account = 1  # 一级账户
+    Credit_Secondary_Account = 2  # 二级账户
+    Credit_Third_Level_Account = 3  # 三级账户
 
     Credit_Primary_Account_Limit = 500000.0
     Credit_Secondary_Account_Limit = 0
@@ -84,6 +84,7 @@ def buy_regular_deposit(request):
         customer_id = int(request.POST['customer_id'])
         regular_deposit_id = int(request.POST['regular_deposit_id'])
         purchase_amount = float(request.POST['purchase_amount'])
+        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d')
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
@@ -103,7 +104,8 @@ def buy_regular_deposit(request):
     customer.deposit -= purchase_amount
     customer.save()
     RegularDepositInvestment(customer_id=customer_id, regular_deposit_id=regular_deposit_id,
-                             due_date=datetime.now() + timedelta(days=regular_deposit.return_cycle),
+                             purchase_date=purchase_date,
+                             due_date=purchase_date + timedelta(days=regular_deposit.return_cycle),
                              purchase_amount=purchase_amount).save()
     response_data = {'msg': 'purchase success'}
     return HttpResponse(json.dumps(response_data))
@@ -117,6 +119,8 @@ def buy_fund(request):
         customer_id = int(request.POST['customer_id'])
         fund_id = int(request.POST['fund_id'])
         purchase_amount = float(request.POST['purchase_amount'])
+        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d')
+        return_cycle = int(request.POST['return_cycle'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
@@ -135,17 +139,15 @@ def buy_fund(request):
     if _get_customer_credit(customer)['credit_level'] > Credit.Credit_Secondary_Account:
         return HttpResponseForbidden('credit level forbidden')
 
-    fund_price = _get_fund_price(fund_id, datetime.today())
+    fund_price = _get_fund_price(fund_id, purchase_date)
     if not fund_price:
         return HttpResponseForbidden('invalid purchase')
-    try:
-        fund_investment = FundInvestment.objects.get(customer_id=customer_id, fund_id=fund_id)
-        fund_investment.cumulative_purchase_amount += purchase_amount
-        fund_investment.position_share += purchase_amount / fund_price
-    except FundInvestment.DoesNotExist:
-        fund_investment = FundInvestment(customer_id=customer_id, fund_id=fund_id,
-                                         position_share=purchase_amount / fund_price,
-                                         cumulative_purchase_amount=purchase_amount)
+
+    fund_investment = FundInvestment(customer_id=customer_id, fund_id=fund_id,
+                                     position_share=purchase_amount / fund_price,
+                                     cumulative_purchase_amount=purchase_amount,
+                                     purchase_date=purchase_date,
+                                     due_date=purchase_date + timedelta(days=return_cycle))
 
     customer.deposit -= purchase_amount
     customer.save()
@@ -162,6 +164,7 @@ def buy_stock(request):
         customer_id = int(request.POST['customer_id'])
         stock_id = int(request.POST['stock_id'])
         new_position_share = int(request.POST['new_position_share'])  # 新买入的股数
+        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d')
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
@@ -175,7 +178,7 @@ def buy_stock(request):
 
     if not _fine_repay(customer):
         return HttpResponseForbidden('cannot pay fine')
-    stock_price = _get_stock_price(stock_id, datetime.today())
+    stock_price = _get_stock_price(stock_id, purchase_date)
     if not stock_price:
         return HttpResponseForbidden('invalid purchase')
     purchase_amount = stock_price * new_position_share
@@ -191,6 +194,7 @@ def buy_stock(request):
     except StockInvestment.DoesNotExist:
         stock_investment = StockInvestment(customer_id=customer_id, stock_id=stock_id,
                                            position_share=new_position_share,
+                                           purchase_date=purchase_date,
                                            cumulative_purchase_amount=purchase_amount)
 
     customer.deposit -= purchase_amount

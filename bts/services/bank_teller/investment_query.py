@@ -23,7 +23,7 @@ def query_customer_fund_invest(request):
         curr_fund_price = _get_fund_price(fund_id=fund_invest['fund_id'], search_date=query_date)
         if curr_fund_price:
             fund_invest['current_profit'] = fund_invest['position_share'] * curr_fund_price \
-                                            - fund_invest['cumulative_purchase_amount']
+                                            - fund_invest['purchase_amount']
         else:
             fund_invest['current_profit'] = None
     return HttpResponse(json.dumps(fund_invest_list))
