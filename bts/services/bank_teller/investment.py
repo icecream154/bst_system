@@ -84,7 +84,7 @@ def buy_regular_deposit(request):
         customer_id = int(request.POST['customer_id'])
         regular_deposit_id = int(request.POST['regular_deposit_id'])
         purchase_amount = float(request.POST['purchase_amount'])
-        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d')
+        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
@@ -119,7 +119,7 @@ def buy_fund(request):
         customer_id = int(request.POST['customer_id'])
         fund_id = int(request.POST['fund_id'])
         purchase_amount = float(request.POST['purchase_amount'])
-        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d')
+        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
         return_cycle = int(request.POST['return_cycle'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -164,7 +164,7 @@ def buy_stock(request):
         customer_id = int(request.POST['customer_id'])
         stock_id = int(request.POST['stock_id'])
         new_position_share = int(request.POST['new_position_share'])  # 新买入的股数
-        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d')
+        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 

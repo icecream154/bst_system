@@ -10,6 +10,8 @@ from .services.market import investment_market
 urlpatterns = [
     path('', views.index, name='index'),
     # --系统模块--
+    # 柜员注册
+    path('system/register', account.bank_teller_register, name='register'),
     # 登录
     path('system/login', account.bank_teller_login, name='login'),
     # 登出

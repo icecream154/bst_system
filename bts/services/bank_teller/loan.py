@@ -30,7 +30,7 @@ def request_loan(request):
         # print(request.POST['payment'])
         repay_cycle = int(request.POST['repay_cycle'])
         # print(request.POST['repay_cycle'])
-        created_time = datetime.strptime(request.POST['created_time'], '%Y-%m-%d')
+        created_time = datetime.strptime(request.POST['created_time'], '%Y-%m-%d').date()
         # print(request.POST['created_time'])
         customer = Customer.objects.get(customer_id=customer_id)
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
@@ -46,8 +46,8 @@ def request_loan(request):
 
     new_loan_record = LoanRecord(customer=customer, payment=payment,
                                  repay_cycle=repay_cycle,
-                                 due_date=datetime.today() + timedelta(days=repay_cycle),
-                                 next_overdue_date=datetime.today() + timedelta(days=repay_cycle),
+                                 due_date=created_time + timedelta(days=repay_cycle),
+                                 next_overdue_date=created_time + timedelta(days=repay_cycle),
                                  left_payment=payment, left_fine=0.0, created_time=created_time)
     new_loan_record.save()
     response_data = {'msg': 'loan request success'}
@@ -64,7 +64,6 @@ def query_loan_record_by_customer_id(request):
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
-    print('[before query loan record]')
     response_data = []
     for loan_record in customer.loanrecord_set.all():
         _calculate_fine(loan_record)

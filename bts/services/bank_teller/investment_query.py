@@ -14,7 +14,7 @@ def query_customer_fund_invest(request):
 
     try:
         customer_id = int(request.GET['customer_id'])
-        query_date = datetime.strptime(request.GET['query_date'], '%Y-%m-%d')
+        query_date = datetime.strptime(request.GET['query_date'], '%Y-%m-%d').date()
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
@@ -38,7 +38,7 @@ def query_customer_stock_invest(request):
 
     try:
         customer_id = int(request.GET['customer_id'])
-        query_date = datetime.strptime(request.GET['query_date'], '%Y-%m-%d')
+        query_date = datetime.strptime(request.GET['query_date'], '%Y-%m-%d').date()
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 

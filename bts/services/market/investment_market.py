@@ -83,7 +83,7 @@ def _get_stock_price(stock: Stock, search_date):
 def get_fund_price(request):
     try:
         fund_id = int(request.GET['fund_id'])
-        search_date = datetime.strptime(request.GET['search_date'], '%Y-%m-%d')
+        search_date = datetime.strptime(request.GET['search_date'], '%Y-%m-%d').date()
         fund = Fund.objects.get(fund_id=fund_id)
     except (KeyError, ValueError, TypeError, Fund.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -100,7 +100,7 @@ def get_fund_price(request):
 def get_stock_price(request):
     try:
         stock_id = int(request.GET['stock_id'])
-        search_date = datetime.strptime(request.GET['search_date'], '%Y-%m-%d')
+        search_date = datetime.strptime(request.GET['search_date'], '%Y-%m-%d').date()
         stock = Stock.objects.get(stock_id=stock_id)
     except (KeyError, ValueError, TypeError, Stock.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -119,7 +119,7 @@ def issue_fund(request):
         return HttpResponse(content='Unauthorized', status=401)
     try:
         fund_name = request.POST['fund_name']
-        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d')
+        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d').date()
         issue_price = float(request.POST['issue_price'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -137,7 +137,7 @@ def issue_stock(request):
         return HttpResponse(content='Unauthorized', status=401)
     try:
         stock_name = request.POST['stock_name']
-        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d')
+        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d').date()
         issue_price = float(request.POST['issue_price'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -155,7 +155,7 @@ def issue_regular_deposit(request):
         return HttpResponse(content='Unauthorized', status=401)
     try:
         regular_deposit_name = request.POST['regular_deposit_name']
-        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d')
+        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d').date()
         return_cycle = int(request.POST['return_cycle'])
         return_rate = float(request.POST['return_rate'])
     except (KeyError, ValueError, TypeError):
