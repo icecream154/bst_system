@@ -6,6 +6,7 @@ from django.http import HttpResponseBadRequest, HttpResponse, Http404
 
 from bts.models.products import FundPriceRecord, StockPriceRecord, Fund, Stock, RegularDeposit
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
+from bts.utils.request_processor import fetch_parameter_dict
 
 
 def _query_products(query_id: int, product_cls):
@@ -118,9 +119,10 @@ def issue_fund(request):
     if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
     try:
-        fund_name = request.POST['fund_name']
-        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d').date()
-        issue_price = float(request.POST['issue_price'])
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        fund_name = parameter_dict['fund_name']
+        issue_date = datetime.strptime(parameter_dict['issue_date'], '%Y-%m-%d').date()
+        issue_price = float(parameter_dict['issue_price'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
     if issue_price <= 0:
@@ -136,9 +138,10 @@ def issue_stock(request):
     if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
     try:
-        stock_name = request.POST['stock_name']
-        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d').date()
-        issue_price = float(request.POST['issue_price'])
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        stock_name = parameter_dict['stock_name']
+        issue_date = datetime.strptime(parameter_dict['issue_date'], '%Y-%m-%d').date()
+        issue_price = float(parameter_dict['issue_price'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
     if issue_price <= 0:
@@ -154,10 +157,11 @@ def issue_regular_deposit(request):
     if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
     try:
-        regular_deposit_name = request.POST['regular_deposit_name']
-        issue_date = datetime.strptime(request.POST['issue_date'], '%Y-%m-%d').date()
-        return_cycle = int(request.POST['return_cycle'])
-        return_rate = float(request.POST['return_rate'])
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        regular_deposit_name = parameter_dict['regular_deposit_name']
+        issue_date = datetime.strptime(parameter_dict['issue_date'], '%Y-%m-%d').date()
+        return_cycle = int(parameter_dict['return_cycle'])
+        return_rate = float(parameter_dict['return_rate'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
     if return_rate <= 0 or return_rate > 0.2 or return_cycle < 7:

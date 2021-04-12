@@ -79,27 +79,30 @@ if __name__ == '__main__':
     status_code, response_dict = sys_register('BTS', 'imbus123', '柜员一', '13966667777')
     show_info(status_code, response_dict)
 
-    status_code, response_dict = sys_login('BTS', 'imbus123')
+    status_code, response_dict = sys_register('BTS3', '123', '柜员二', '13966667777')
     show_info(status_code, response_dict)
 
-    bt_token = response_dict['token']
-    status_code, response_dict = add_customer(bt_token, name='客户一', phone='13100001234',
-                                              id_number='330888855550001', deposit=1000.0)
-    show_info(status_code, response_dict)
-    status_code, response_dict = query_customer_by_id_number(bt_token, '330888855550001')
-    show_info(status_code, response_dict)
-
-    test_customer_id = response_dict['customer_id']
-    status_code, response_dict = customer_deposit(bt_token, test_customer_id, 200.0)
-    show_info(status_code, response_dict)
-    status_code, response_dict = query_customer_by_id_number(bt_token, '330888855550001')
-    show_info(status_code, response_dict)
-
-    status_code, response_dict = customer_loan(token=bt_token, customer_id=test_customer_id, payment=300,
-                                               repay_cycle=7, created_time='2021-4-1')
-    show_info(status_code, response_dict)
-    status_code, response_dict = loan_query_record(bt_token, test_customer_id)
-    show_info(status_code, response_dict)
-
-    status_code, response_dict = sys_logout(bt_token)
-    show_info(status_code, response_dict)
+    # status_code, response_dict = sys_login('BTS', 'imbus123')
+    # show_info(status_code, response_dict)
+    #
+    # bt_token = response_dict['token']
+    # status_code, response_dict = add_customer(bt_token, name='客户一', phone='13100001234',
+    #                                           id_number='330888855550001', deposit=1000.0)
+    # show_info(status_code, response_dict)
+    # status_code, response_dict = query_customer_by_id_number(bt_token, '330888855550001')
+    # show_info(status_code, response_dict)
+    #
+    # test_customer_id = response_dict['customer_id']
+    # status_code, response_dict = customer_deposit(bt_token, test_customer_id, 200.0)
+    # show_info(status_code, response_dict)
+    # status_code, response_dict = query_customer_by_id_number(bt_token, '330888855550001')
+    # show_info(status_code, response_dict)
+    #
+    # status_code, response_dict = customer_loan(token=bt_token, customer_id=test_customer_id, payment=300,
+    #                                            repay_cycle=7, created_time='2021-4-1')
+    # show_info(status_code, response_dict)
+    # status_code, response_dict = loan_query_record(bt_token, test_customer_id)
+    # show_info(status_code, response_dict)
+    #
+    # status_code, response_dict = sys_logout(bt_token)
+    # show_info(status_code, response_dict)

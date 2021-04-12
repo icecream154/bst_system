@@ -4,6 +4,7 @@ from django.http import HttpResponse, Http404, HttpResponseBadRequest
 
 from bts.models.customer import Customer
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
+from bts.utils.request_processor import fetch_parameter_dict
 
 
 def add_customer(request):
@@ -13,10 +14,11 @@ def add_customer(request):
     # TODO: 未做参数校验
 
     try:
-        name = request.POST['name']
-        phone = request.POST['phone']
-        id_number = request.POST['id_number']
-        deposit = float(request.POST['deposit'])
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        name = parameter_dict['name']
+        phone = parameter_dict['phone']
+        id_number = parameter_dict['id_number']
+        deposit = float(parameter_dict['deposit'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 

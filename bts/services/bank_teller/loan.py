@@ -6,6 +6,7 @@ from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpRespo
 from bts.models.customer import Customer
 from bts.models.loan import LoanRecord, LoanRepay
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
+from bts.utils.request_processor import fetch_parameter_dict
 
 
 def _calculate_fine(loan_record: LoanRecord):
@@ -24,14 +25,15 @@ def request_loan(request):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
-        customer_id = int(request.POST['customer_id'])
-        # print(request.POST['customer_id'])
-        payment = float(request.POST['payment'])
-        # print(request.POST['payment'])
-        repay_cycle = int(request.POST['repay_cycle'])
-        # print(request.POST['repay_cycle'])
-        created_time = datetime.strptime(request.POST['created_time'], '%Y-%m-%d').date()
-        # print(request.POST['created_time'])
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        customer_id = int(parameter_dict['customer_id'])
+        # print(parameter_dict['customer_id'])
+        payment = float(parameter_dict['payment'])
+        # print(parameter_dict['payment'])
+        repay_cycle = int(parameter_dict['repay_cycle'])
+        # print(parameter_dict['repay_cycle'])
+        created_time = datetime.strptime(parameter_dict['created_time'], '%Y-%m-%d').date()
+        # print(parameter_dict['created_time'])
         customer = Customer.objects.get(customer_id=customer_id)
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -94,8 +96,9 @@ def loan_repay(request):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
-        loan_record_id = int(request.POST['loan_record_id'])
-        repay = float(request.POST['repay'])
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        loan_record_id = int(parameter_dict['loan_record_id'])
+        repay = float(parameter_dict['repay'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 

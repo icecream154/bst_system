@@ -1,20 +1,29 @@
 import json
 
+from django.core.exceptions import ValidationError
 from django.shortcuts import render
+from django.contrib.auth.password_validation import validate_password
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
 
 from bts.models.bank_teller import BankTeller
 from bts.services.system.token import update_token, fetch_bank_teller_by_token, expire_token, TOKEN_HEADER_KEY
+from bts.utils.request_processor import fetch_parameter_dict
 
 
 def bank_teller_register(request):
     try:
-        account = request.POST['account']
-        password = request.POST['password']
-        name = request.POST['name']
-        phone = request.POST['phone']
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        account = parameter_dict['account']
+        password = parameter_dict['password']
+        name = parameter_dict['name']
+        phone = parameter_dict['phone']
     except KeyError:
         return HttpResponseBadRequest("parameter missing or invalid parameter")
+
+    try:
+        validate_password(password=password)
+    except ValidationError:
+        return HttpResponseForbidden("password not accepted, too simple")
 
     # TODO: 参数校验
     try:
@@ -29,8 +38,9 @@ def bank_teller_register(request):
 def bank_teller_login(request):
     # print('INFO: got request: [%s]' % str(request))
     try:
-        bank_teller = BankTeller.objects.get(account=request.POST['account'])
-        password = request.POST['password']
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        bank_teller = BankTeller.objects.get(account=parameter_dict['account'])
+        password = parameter_dict['password']
     except KeyError:
         return HttpResponseBadRequest("parameter missing or invalid parameter")
     except BankTeller.DoesNotExist:
@@ -38,7 +48,7 @@ def bank_teller_login(request):
         return HttpResponseForbidden("account doesn't exist")
 
     if password != bank_teller.password:
-        # print("INFO: wrong password: [%s] doesn't match [%s]" % (request.POST['password'], bank_teller.password))
+        # print("INFO: wrong password: [%s] doesn't match [%s]" % (parameter_dict['password'], bank_teller.password))
         return HttpResponseForbidden("wrong password")
 
     new_token, new_expire_time = update_token(bank_teller)

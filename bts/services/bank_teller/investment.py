@@ -11,6 +11,7 @@ from bts.models.products import RegularDeposit, Fund, Stock
 from bts.services.bank_teller.loan import _loan_repay
 from bts.services.market.investment_market import _get_fund_price, _get_stock_price
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
+from bts.utils.request_processor import fetch_parameter_dict
 
 
 class Credit:
@@ -81,9 +82,10 @@ def buy_regular_deposit(request):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
-        customer_id = int(request.POST['customer_id'])
-        regular_deposit_id = int(request.POST['regular_deposit_id'])
-        purchase_amount = float(request.POST['purchase_amount'])
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        customer_id = int(parameter_dict['customer_id'])
+        regular_deposit_id = int(parameter_dict['regular_deposit_id'])
+        purchase_amount = float(parameter_dict['purchase_amount'])
         purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -116,11 +118,12 @@ def buy_fund(request):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
-        customer_id = int(request.POST['customer_id'])
-        fund_id = int(request.POST['fund_id'])
-        purchase_amount = float(request.POST['purchase_amount'])
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        customer_id = int(parameter_dict['customer_id'])
+        fund_id = int(parameter_dict['fund_id'])
+        purchase_amount = float(parameter_dict['purchase_amount'])
         purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
-        return_cycle = int(request.POST['return_cycle'])
+        return_cycle = int(parameter_dict['return_cycle'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
@@ -161,9 +164,10 @@ def buy_stock(request):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
-        customer_id = int(request.POST['customer_id'])
-        stock_id = int(request.POST['stock_id'])
-        new_position_share = int(request.POST['new_position_share'])  # 新买入的股数
+        parameter_dict = fetch_parameter_dict(request, 'POST')
+        customer_id = int(parameter_dict['customer_id'])
+        stock_id = int(parameter_dict['stock_id'])
+        new_position_share = int(parameter_dict['new_position_share'])  # 新买入的股数
         purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
