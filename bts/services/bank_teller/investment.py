@@ -24,9 +24,9 @@ class Credit:
 
 
 def _get_customer_credit(customer: Customer):
-    total_left_payment = customer.loanrecord_set \
+    total_left_payment = customer.loanrecord_set.all() \
         .aggregate(total_left_payment=Sum('left_payment'))['total_left_payment']
-    total_left_fine = customer.loanrecord_set \
+    total_left_fine = customer.loanrecord_set.all() \
         .aggregate(total_left_fine=Sum('left_fine'))['total_left_fine']
 
     credit_info = {
@@ -63,12 +63,12 @@ def get_customer_credit(request):
 
 
 def _fine_repay(customer: Customer):
-    total_left_fine = customer.loanrecord_set \
+    total_left_fine = customer.loanrecord_set.all() \
         .aggregate(total_left_fine=Sum('left_fine'))['total_left_fine']
     if customer.deposit >= total_left_fine:
         customer.deposit -= total_left_fine
         customer.save()
-        loan_records = customer.loanrecord_set
+        loan_records = customer.loanrecord_set.all()
         for loan_record in loan_records:
             if loan_record.left_fine > 0.0:
                 _loan_repay(loan_record, loan_record.left_fine)
