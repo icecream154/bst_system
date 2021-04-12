@@ -14,7 +14,7 @@ def _query_products(query_id: int, product_cls):
         product_list = list(product_cls.objects.all())
         response_data = []
         for product in product_list:
-            response_data.add(product.to_dict())
+            response_data.append(product.to_dict())
         return HttpResponse(json.dumps(response_data))
     try:
         product = product_cls.objects.get(pk=query_id)

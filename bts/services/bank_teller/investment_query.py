@@ -68,7 +68,7 @@ def query_customer_regular_deposit_invest(request):
     for regular_deposit_invest in regular_deposit_invest_list:
         return_rate = RegularDeposit.objects.get(regular_deposit_id=regular_deposit_invest['regular_deposit_id'])\
                         .return_rate
-        regular_deposit_invest['expecting_profit': return_rate * regular_deposit_invest['purchase_amount']]
+        regular_deposit_invest['expecting_profit'] = return_rate * regular_deposit_invest['purchase_amount']
     return HttpResponse(json.dumps(regular_deposit_invest_list))
 
 
