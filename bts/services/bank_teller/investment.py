@@ -66,8 +66,6 @@ def _fine_repay(customer: Customer):
     total_left_fine = customer.loanrecord_set.all() \
         .aggregate(total_left_fine=Sum('left_fine'))['total_left_fine']
     if customer.deposit >= total_left_fine:
-        customer.deposit -= total_left_fine
-        customer.save()
         loan_records = customer.loanrecord_set.all()
         for loan_record in loan_records:
             if loan_record.left_fine > 0.0:

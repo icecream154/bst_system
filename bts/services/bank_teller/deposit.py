@@ -25,7 +25,7 @@ def customer_deposit(request):
     try:
         customer = Customer.objects.get(customer_id=customer_id)
         customer.deposit += new_deposit
-        DepositRecord(customer=customer, payment=new_deposit).save()
+        DepositRecord(customer=customer, payment=new_deposit, current_deposit=customer.deposit).save()
         customer.save()
         response_data = {'msg': 'customer deposit success'}
         return HttpResponse(json.dumps(response_data))

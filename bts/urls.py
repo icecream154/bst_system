@@ -6,6 +6,7 @@ from .services.bank_teller import deposit, loan_query
 from .services.bank_teller import loan
 from .services.bank_teller import investment, investment_query
 from .services.market import investment_market
+from .services.record_query import deposit, repay
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -80,4 +81,10 @@ urlpatterns = [
     path('market/issue_stock', investment_market.issue_stock, name='issue_stock'),
     # 发行定期理财产品
     path('market/issue_regular_deposit', investment_market.issue_regular_deposit, name='issue_regular_deposit'),
+
+    # 流水模块
+    # 查询存款记录
+    path('record_query/deposit', deposit.query_deposits_by_customer_id, name='query_deposits_by_customer_id'),
+    # 查询还款记录
+    path('record_query/repay', repay.query_repays_by_customer_id, name='query_repays_by_customer_id'),
 ]

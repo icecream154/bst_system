@@ -6,7 +6,7 @@ from bts.models.customer import Customer
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
 
-def query_repays_by_customer_id(request):
+def query_deposits_by_customer_id(request):
     if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
         return HttpResponse(content='Unauthorized', status=401)
 
@@ -17,8 +17,7 @@ def query_repays_by_customer_id(request):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
     response_data = []
-    for loan_record in customer.loanrecord_set.all():
-        for loan_repay in loan_record.loanrepay_set.all():
-            response_data.append(loan_repay.to_dict())
+    for deposit_record in customer.depositrecord_set.all():
+        response_data.append(deposit_record.to_dict())
 
     return HttpResponse(json.dumps(response_data))

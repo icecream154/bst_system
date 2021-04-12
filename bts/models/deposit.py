@@ -13,6 +13,8 @@ class DepositRecord(models.Model):
     created_time = models.DateField(default=timezone.now)
     # 存款金额
     payment = models.FloatField()
+    # 存款后账户余额
+    current_deposit = models.FloatField()
 
     def to_dict(self):
         dictionary = {
@@ -20,6 +22,7 @@ class DepositRecord(models.Model):
             'customer_id': self.customer.customer_id,
             'customer_id_number': self.customer.id_number,
             'created_time': self.created_time.strftime('%Y-%m-%d'),
-            'payment': self.payment
+            'payment': self.payment,
+            'current_deposit': self.current_deposit
         }
         return dictionary

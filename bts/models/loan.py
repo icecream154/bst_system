@@ -11,6 +11,8 @@ class LoanRecord(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     # 贷款金额
     payment = models.FloatField()
+    # 当前账户余额
+    current_deposit = models.FloatField()
     # 还款周期(天数)
     repay_cycle = models.IntegerField()
     # 到期时间
@@ -30,6 +32,7 @@ class LoanRecord(models.Model):
             'customer_id': self.customer.customer_id,
             'created_time': self.created_time.strftime('%Y-%m-%d'),
             'payment': self.payment,
+            'current_deposit': self.current_deposit,
             'repay_cycle': self.repay_cycle,
             'due_date': self.due_date.strftime('%Y-%m-%d'),
             'next_overdue_date': self.next_overdue_date.strftime('%Y-%m-%d'),
@@ -52,6 +55,8 @@ class LoanRepay(models.Model):
     repay = models.FloatField()
     # 还款时间
     repay_time = models.DateField(default=timezone.now)
+    # 还款后账户余额
+    current_deposit = models.FloatField()
 
     def to_dict(self):
         dictionary = {
@@ -61,5 +66,6 @@ class LoanRepay(models.Model):
             'left_fine_before': self.left_fine_before,
             'repay': self.repay,
             'repay_time': self.repay_time.strftime('%Y-%m-%d'),
+            'current_deposit': self.current_deposit,
         }
         return dictionary

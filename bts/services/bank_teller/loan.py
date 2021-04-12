@@ -46,9 +46,8 @@ def request_loan(request):
     except Customer.DoesNotExist:
         raise Http404('No such customer')
 
-    new_loan_record = LoanRecord(customer=customer, payment=payment,
-                                 repay_cycle=repay_cycle,
-                                 due_date=created_time + timedelta(days=repay_cycle),
+    new_loan_record = LoanRecord(customer=customer, payment=payment, current_deposit=customer.deposit,
+                                 repay_cycle=repay_cycle, due_date=created_time + timedelta(days=repay_cycle),
                                  next_overdue_date=created_time + timedelta(days=repay_cycle),
                                  left_payment=payment, left_fine=0.0, created_time=created_time)
     new_loan_record.save()
@@ -56,11 +55,7 @@ def request_loan(request):
     return HttpResponse(json.dumps(response_data))
 
 
-def _loan_repay(loan_record: LoanRecord, repay):
-    new_loan_repay = LoanRepay(loan_record=loan_record,
-                               left_payment_before=loan_record.left_payment,
-                               left_fine_before=loan_record.left_fine,
-                               repay=repay)
+def _loan_repay(loan_record: LoanRecord, repay: float):
     if repay > loan_record.left_fine + loan_record.left_payment or repay <= 0:
         return False
     if repay > loan_record.left_fine:
@@ -68,6 +63,13 @@ def _loan_repay(loan_record: LoanRecord, repay):
         loan_record.left_fine = 0
     else:
         loan_record.left_fine -= repay
+
+    loan_record.customer.deposit -= repay
+    new_loan_repay = LoanRepay(loan_record=loan_record,
+                               left_payment_before=loan_record.left_payment,
+                               left_fine_before=loan_record.left_fine,
+                               repay=repay, current_deposit=loan_record.customer.deposit)
+    loan_record.customer.save()
     loan_record.save()
     new_loan_repay.save()  # repay record saved after real load record is modified
     return True
@@ -124,7 +126,7 @@ def auto_repay_process(request):
                 new_loan_repay = LoanRepay(loan_record=loan_record,
                                            left_payment_before=left_payment_before,
                                            left_fine_before=left_fine_before,
-                                           repay=curr_repay)
+                                           repay=curr_repay, current_deposit=customer.deposit)
             loan_record.save()
             customer.save()
             new_loan_repay.save()
