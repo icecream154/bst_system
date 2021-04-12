@@ -109,7 +109,7 @@ def auto_repay_process(request):
     for loan_record in load_record_query_set:
         _calculate_fine(loan_record)
         if loan_record.left_payment > 0 and datetime.now().date() >= loan_record.due_date:
-            customer = Customer.objects.get(customer=loan_record.customer)
+            customer = loan_record.customer
             curr_repay = 0
             left_payment_before = loan_record.left_payment
             left_fine_before = loan_record.left_fine
