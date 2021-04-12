@@ -37,29 +37,29 @@ def sys_login(username: str, password: str):
 
 
 def sys_logout(token: str):
-    return do_post_request('/system/logout', headers={'token': token})
+    return do_post_request('/system/logout', headers={'authorization': token})
 
 
 # 添加客户
 def add_customer(token: str, name: str, phone: str, id_number: str, deposit: float):
-    return do_post_request('/customer/add', headers={'token': token},
+    return do_post_request('/customer/add', headers={'authorization': token},
                            data={'name': name, 'phone': phone, 'id_number': id_number, 'deposit': deposit})
 
 
 # 通过身份证查询客户
 def query_customer_by_id_number(token: str, id_number: str):
-    return do_get_request('/customer/query_by_id_number', headers={'token': token},
+    return do_get_request('/customer/query_by_id_number', headers={'authorization': token},
                           params={'id_number': id_number})
 
 
 # 客户存款
 def customer_deposit(token: str, customer_id: int, new_deposit: float):
-    return do_post_request('/deposit', headers={'token': token}, data={'customer_id': customer_id,
+    return do_post_request('/deposit', headers={'authorization': token}, data={'customer_id': customer_id,
                                                                        'new_deposit': new_deposit})
 
 # 客户贷款
 def customer_loan(token: str, customer_id: int, payment: float, repay_cycle: int, created_time: str):
-    return do_post_request('/loan/request_loan', headers={'token': token}, data={'customer_id': customer_id,
+    return do_post_request('/loan/request_loan', headers={'authorization': token}, data={'customer_id': customer_id,
                                                                                  'payment': payment,
                                                                                  'repay_cycle': repay_cycle,
                                                                                  'created_time': created_time})
@@ -67,17 +67,17 @@ def customer_loan(token: str, customer_id: int, payment: float, repay_cycle: int
 
 # 查询指定ID的贷款记录
 def loan_query_record_by_id(token: str, loan_record_id: int):
-    return do_get_request('/loan/query_by_record_id',  headers={'token': token},
+    return do_get_request('/loan/query_by_record_id',  headers={'authorization': token},
                           params={'loan_record_id': loan_record_id})
 
 # 查询客户的所有贷款
 def loan_query_record_by_customer_id(token: str, customer_id: int):
-    return do_get_request('/loan/query_by_customer_id', headers={'token': token}, params={'customer_id': customer_id})
+    return do_get_request('/loan/query_by_customer_id', headers={'authorization': token}, params={'customer_id': customer_id})
 
 
 # 客户进行贷款还款
 def customer_loan_repay(token: str, loan_record_id: int, repay: float):
-    return do_post_request('/loan/repay', headers={'token': token}, data={'loan_record_id': loan_record_id,
+    return do_post_request('/loan/repay', headers={'authorization': token}, data={'loan_record_id': loan_record_id,
                                                                           'repay': repay})
 
 # 发起日终处理
@@ -88,21 +88,21 @@ def loan_auto_repay():
 # 发行定期理财产品
 def issue_regular_deposit(token: str, regular_deposit_name: str,
                           issue_date: str, return_cycle: int, return_rate: float):
-    return do_post_request('/market/issue_regular_deposit', headers={'token': token},
+    return do_post_request('/market/issue_regular_deposit', headers={'authorization': token},
                            data={'regular_deposit_name': regular_deposit_name, 'issue_date': issue_date,
                                  'return_cycle': return_cycle, 'return_rate': return_rate})
 
 
 # 发行基金
 def issue_fund(token: str, fund_name: str, issue_date: str, issue_price: float):
-    return do_post_request('/market/issue_fund', headers={'token': token},
+    return do_post_request('/market/issue_fund', headers={'authorization': token},
                            data={'fund_name': fund_name, 'issue_date': issue_date,
                                  'issue_price': issue_price})
 
 
 # 发行股票
 def issue_stock(token: str, stock_name: str, issue_date: str, issue_price: float):
-    return do_post_request('/market/issue_stock', headers={'token': token},
+    return do_post_request('/market/issue_stock', headers={'authorization': token},
                            data={'stock_name': stock_name, 'issue_date': issue_date,
                                  'issue_price': issue_price})
 
@@ -110,7 +110,7 @@ def issue_stock(token: str, stock_name: str, issue_date: str, issue_price: float
 # 购买定期理财产品
 def buy_regular_deposit(token: str, customer_id: int, regular_deposit_id: int,
                         purchase_amount: float, purchase_date: str):
-    return do_post_request('/investment/buy_regular_deposit', headers={'token': token},
+    return do_post_request('/investment/buy_regular_deposit', headers={'authorization': token},
                            data={'customer_id': customer_id, 'regular_deposit_id': regular_deposit_id,
                                  'purchase_amount': purchase_amount, 'purchase_date': purchase_date})
 
@@ -118,7 +118,7 @@ def buy_regular_deposit(token: str, customer_id: int, regular_deposit_id: int,
 # 购买基金产品
 def buy_fund(token: str, customer_id: int, fund_id: int,
                         purchase_amount: float, purchase_date: str, return_cycle: int):
-    return do_post_request('/investment/buy_fund', headers={'token': token},
+    return do_post_request('/investment/buy_fund', headers={'authorization': token},
                            data={'customer_id': customer_id, 'fund_id': fund_id,
                                  'purchase_amount': purchase_amount, 'purchase_date': purchase_date,
                                  'return_cycle': return_cycle})
@@ -127,7 +127,7 @@ def buy_fund(token: str, customer_id: int, fund_id: int,
 # 购买股票产品
 def buy_stock(token: str, customer_id: int, stock_id: int,
                         new_position_share: float, purchase_date: str):
-    return do_post_request('/investment/buy_stock', headers={'token': token},
+    return do_post_request('/investment/buy_stock', headers={'authorization': token},
                            data={'customer_id': customer_id, 'stock_id': stock_id,
                                  'new_position_share': new_position_share, 'purchase_date': purchase_date})
 
