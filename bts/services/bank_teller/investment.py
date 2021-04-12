@@ -148,7 +148,7 @@ def buy_fund(request):
 
     fund_investment = FundInvestment(customer=customer, fund=fund,
                                      position_share=purchase_amount / fund_price,
-                                     cumulative_purchase_amount=purchase_amount,
+                                     purchase_amount=purchase_amount,
                                      purchase_date=purchase_date,
                                      due_date=purchase_date + timedelta(days=return_cycle))
 

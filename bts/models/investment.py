@@ -55,7 +55,7 @@ class StockInvestment(models.Model):
             'stock_id': self.stock.stock_id,
             'position_share': self.position_share,
             'cumulative_purchase_amount': self.cumulative_purchase_amount,
-            'purchase_date': self.purchase_dat.strftime('%Y-%m-%d')
+            'purchase_date': self.purchase_date.strftime('%Y-%m-%d')
         }
         return dictionary
 
