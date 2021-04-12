@@ -9,7 +9,7 @@ from bts.models.investment import RegularDepositInvestment, FundInvestment, Stoc
 from bts.models.loan import LoanRecord
 from bts.models.products import RegularDeposit, Fund, Stock
 from bts.services.bank_teller.loan import _loan_repay
-from bts.services.market.investment_market import _get_fund_price, _get_stock_price
+from bts.services.market.investment_market import get_fund_price_from_market, get_stock_price_from_market
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 from bts.utils.request_processor import fetch_parameter_dict
 
@@ -24,9 +24,9 @@ class Credit:
 
 
 def _get_customer_credit(customer: Customer):
-    total_left_payment = LoanRecord.objects.filter(customer=customer) \
+    total_left_payment = customer.loanrecord_set \
         .aggregate(total_left_payment=Sum('left_payment'))['total_left_payment']
-    total_left_fine = LoanRecord.objects.filter(customer=customer) \
+    total_left_fine = customer.loanrecord_set \
         .aggregate(total_left_fine=Sum('left_fine'))['total_left_fine']
 
     credit_info = {
@@ -68,7 +68,7 @@ def _fine_repay(customer: Customer):
     if customer.deposit >= total_left_fine:
         customer.deposit -= total_left_fine
         customer.save()
-        loan_records = LoanRecord.objects.filter(customer=customer)
+        loan_records = customer.loanrecord_set
         for loan_record in loan_records:
             if loan_record.left_fine > 0.0:
                 _loan_repay(loan_record, loan_record.left_fine)
@@ -142,7 +142,7 @@ def buy_fund(request):
     if _get_customer_credit(customer)['credit_level'] > Credit.Credit_Secondary_Account:
         return HttpResponseForbidden('credit level forbidden')
 
-    fund_price = _get_fund_price(fund, purchase_date)
+    fund_price = get_fund_price_from_market(fund, purchase_date)
     if not fund_price:
         return HttpResponseForbidden('invalid purchase')
 
@@ -182,7 +182,7 @@ def buy_stock(request):
 
     if not _fine_repay(customer):
         return HttpResponseForbidden('cannot pay fine')
-    stock_price = _get_stock_price(stock, purchase_date)
+    stock_price = get_stock_price_from_market(stock, purchase_date)
     if not stock_price:
         return HttpResponseForbidden('invalid purchase')
     purchase_amount = stock_price * new_position_share

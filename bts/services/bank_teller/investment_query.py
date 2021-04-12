@@ -2,9 +2,10 @@ import json
 from datetime import datetime
 from django.http import HttpResponse, HttpResponseBadRequest
 
+from bts.models.customer import Customer
 from bts.models.investment import FundInvestment, StockInvestment, RegularDepositInvestment
 from bts.models.products import RegularDeposit, Fund, Stock
-from bts.services.market.investment_market import _get_fund_price, _get_stock_price
+from bts.services.market.investment_market import get_fund_price_from_market, get_stock_price_from_market
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
 
@@ -13,16 +14,16 @@ def query_customer_fund_invest(request):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
-        customer_id = int(request.GET['customer_id'])
+        customer = Customer.objects.get(customer_id=int(request.GET['customer_id']))
         query_date = datetime.strptime(request.GET['query_date'], '%Y-%m-%d').date()
-    except (KeyError, ValueError, TypeError):
+    except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
-    fund_invest_list = _query_customer_product_invest(customer_id, FundInvestment)
+    fund_invest_list = _query_customer_product_invest(customer, FundInvestment)
     for fund_invest in fund_invest_list:
         try:
             fund = Fund.objects.get(fund_invest['fund_id'])
-            curr_fund_price = _get_fund_price(fund=fund, search_date=query_date)
+            curr_fund_price = get_fund_price_from_market(fund=fund, search_date=query_date)
             if curr_fund_price:
                 fund_invest['current_profit'] = fund_invest['position_share'] * curr_fund_price \
                                                 - fund_invest['purchase_amount']
@@ -37,16 +38,16 @@ def query_customer_stock_invest(request):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
-        customer_id = int(request.GET['customer_id'])
+        customer = Customer.objects.get(customer_id=int(request.GET['customer_id']))
         query_date = datetime.strptime(request.GET['query_date'], '%Y-%m-%d').date()
-    except (KeyError, ValueError, TypeError):
+    except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
-    stock_invest_list = _query_customer_product_invest(customer_id, StockInvestment)
+    stock_invest_list = _query_customer_product_invest(customer, StockInvestment)
     for stock_invest in stock_invest_list:
         try:
             stock = Stock.objects.get(stock_invest['stock_id'])
-            curr_stock_price = _get_stock_price(stock=stock, search_date=query_date)
+            curr_stock_price = get_stock_price_from_market(stock=stock, search_date=query_date)
             if curr_stock_price:
                 stock_invest['current_profit'] = stock_invest['position_share'] * curr_stock_price \
                                                 - stock_invest['cumulative_purchase_amount']
@@ -60,11 +61,11 @@ def query_customer_regular_deposit_invest(request):
         return HttpResponse(content='Unauthorized', status=401)
 
     try:
-        customer_id = int(request.GET['customer_id'])
-    except (KeyError, ValueError, TypeError):
+        customer = Customer.objects.get(customer_id=int(request.GET['customer_id']))
+    except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
-    regular_deposit_invest_list = _query_customer_product_invest(customer_id, RegularDepositInvestment)
+    regular_deposit_invest_list = _query_customer_product_invest(customer, RegularDepositInvestment)
     for regular_deposit_invest in regular_deposit_invest_list:
         return_rate = RegularDeposit.objects.get(regular_deposit_id=regular_deposit_invest['regular_deposit_id'])\
                         .return_rate
@@ -72,9 +73,9 @@ def query_customer_regular_deposit_invest(request):
     return HttpResponse(json.dumps(regular_deposit_invest_list))
 
 
-def _query_customer_product_invest(customer_id: int, product_invest_cls):
-    product_invest_obj_list = list(product_invest_cls.objects.filter(customer_id=customer_id))
+def _query_customer_product_invest(customer: Customer, product_invest_cls):
+    product_invest_obj_list = list(product_invest_cls.objects.filter(customer=customer))
     product_invest_list = []
     for product_invest in product_invest_obj_list:
-        product_invest_list.add(product_invest.to_dict())
+        product_invest_list.append(product_invest.to_dict())
     return product_invest_list

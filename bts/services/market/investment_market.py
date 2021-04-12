@@ -51,7 +51,7 @@ def _get_random_fluctuation(fluctuation_range: float = 0.05):
     return (random.random() - 0.5) * 2 * fluctuation_range
 
 
-def _get_fund_price(fund: Fund, search_date):
+def get_fund_price_from_market(fund: Fund, search_date):
     try:
         if fund.issue_date <= search_date:
             price_record = FundPriceRecord.objects.get(fund=fund, record_date=search_date)
@@ -59,14 +59,14 @@ def _get_fund_price(fund: Fund, search_date):
         else:
             return None
     except FundPriceRecord.DoesNotExist:
-        last_price = _get_fund_price(fund, search_date - timedelta(days=1))
+        last_price = get_fund_price_from_market(fund, search_date - timedelta(days=1))
         price = last_price * (1 + _get_random_fluctuation())
         FundPriceRecord(fund=fund, record_date=search_date,
                         price=price).save()
         return price
 
 
-def _get_stock_price(stock: Stock, search_date):
+def get_stock_price_from_market(stock: Stock, search_date):
     try:
         if stock.issue_date <= search_date:
             price_record = StockPriceRecord.objects.get(stock=stock, record_date=search_date)
@@ -74,7 +74,7 @@ def _get_stock_price(stock: Stock, search_date):
         else:
             return None
     except StockPriceRecord.DoesNotExist:
-        last_price = _get_stock_price(stock, search_date - timedelta(days=1))
+        last_price = get_stock_price_from_market(stock, search_date - timedelta(days=1))
         price = last_price * (1 + _get_random_fluctuation(0.1))
         StockPriceRecord(stock=stock, record_date=search_date,
                          price=price).save()
@@ -92,7 +92,7 @@ def get_fund_price(request):
         print(ex)
         return HttpResponseBadRequest('invalid parameter')
 
-    response_data = {'price': _get_fund_price(fund, search_date)}
+    response_data = {'price': get_fund_price_from_market(fund, search_date)}
     if not response_data['price']:
         return HttpResponseBadRequest('invalid parameter')
     return HttpResponse(json.dumps(response_data))
@@ -109,7 +109,7 @@ def get_stock_price(request):
         print(ex)
         return HttpResponseBadRequest('invalid parameter')
 
-    response_data = {'price': _get_stock_price(stock, search_date)}
+    response_data = {'price': get_stock_price_from_market(stock, search_date)}
     if not response_data['price']:
         return HttpResponseBadRequest('invalid parameter')
     return HttpResponse(json.dumps(response_data))
