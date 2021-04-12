@@ -52,8 +52,20 @@ def request_loan(request):
                                  next_overdue_date=created_time + timedelta(days=repay_cycle),
                                  left_payment=payment, left_fine=0.0, created_time=created_time)
     new_loan_record.save()
-    response_data = {'msg': 'loan request success'}
+    response_data = {'msg': 'loan request success', 'loan_record_id': new_loan_record.loan_record_id}
     return HttpResponse(json.dumps(response_data))
+
+
+def query_loan_record_by_id(request):
+    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
+        return HttpResponse(content='Unauthorized', status=401)
+
+    try:
+        loan_record_id = int(request.GET['loan_record_id'])
+        loan_record = LoanRecord.objects.get(loan_record_id=loan_record_id)
+    except (KeyError, ValueError, TypeError, LoanRecord.DoesNotExist):
+        return HttpResponseBadRequest('parameter missing or invalid parameter')
+    return HttpResponse(json.dumps(loan_record.to_dict()))
 
 
 def query_loan_record_by_customer_id(request):
@@ -75,7 +87,7 @@ def query_loan_record_by_customer_id(request):
 
 
 def _loan_repay(loan_record: LoanRecord, repay):
-    new_loan_repay = LoanRepay(loan_record_=loan_record,
+    new_loan_repay = LoanRepay(loan_record=loan_record,
                                left_payment_before=loan_record.left_payment,
                                left_fine_before=loan_record.left_fine,
                                repay=repay)
