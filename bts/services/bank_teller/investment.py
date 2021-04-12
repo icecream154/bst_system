@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta
 
-from django.db.models import aggregates, Sum
+from django.db.models import Sum
 from django.http import HttpResponse, HttpResponseBadRequest, Http404, HttpResponseForbidden
 
 from bts.models.customer import Customer
@@ -25,9 +25,9 @@ class Credit:
 
 def _get_customer_credit(customer: Customer):
     total_left_payment = LoanRecord.objects.filter(customer=customer) \
-        .aggregates(total_left_payment=Sum('left_payment'))['total_left_payment']
+        .aggregate(total_left_payment=Sum('left_payment'))['total_left_payment']
     total_left_fine = LoanRecord.objects.filter(customer=customer) \
-        .aggregates(total_left_fine=Sum('left_fine'))['total_left_fine']
+        .aggregate(total_left_fine=Sum('left_fine'))['total_left_fine']
 
     credit_info = {
         'deposit': customer.deposit,
@@ -63,8 +63,8 @@ def get_customer_credit(request):
 
 
 def _fine_repay(customer: Customer):
-    total_left_fine = LoanRecord.objects.filter(customer=customer) \
-        .aggregates(total_left_fine=Sum('left_fine'))['total_left_fine']
+    total_left_fine = customer.loanrecord_set \
+        .aggregate(total_left_fine=Sum('left_fine'))['total_left_fine']
     if customer.deposit >= total_left_fine:
         customer.deposit -= total_left_fine
         customer.save()
@@ -86,7 +86,7 @@ def buy_regular_deposit(request):
         customer_id = int(parameter_dict['customer_id'])
         regular_deposit_id = int(parameter_dict['regular_deposit_id'])
         purchase_amount = float(parameter_dict['purchase_amount'])
-        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
+        purchase_date = datetime.strptime(parameter_dict['purchase_date'], '%Y-%m-%d').date()
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 
@@ -122,7 +122,7 @@ def buy_fund(request):
         customer_id = int(parameter_dict['customer_id'])
         fund_id = int(parameter_dict['fund_id'])
         purchase_amount = float(parameter_dict['purchase_amount'])
-        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
+        purchase_date = datetime.strptime(parameter_dict['purchase_date'], '%Y-%m-%d').date()
         return_cycle = int(parameter_dict['return_cycle'])
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
@@ -168,7 +168,7 @@ def buy_stock(request):
         customer_id = int(parameter_dict['customer_id'])
         stock_id = int(parameter_dict['stock_id'])
         new_position_share = int(parameter_dict['new_position_share'])  # 新买入的股数
-        purchase_date = datetime.strptime(request.GET['purchase_date'], '%Y-%m-%d').date()
+        purchase_date = datetime.strptime(parameter_dict['purchase_date'], '%Y-%m-%d').date()
     except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
 

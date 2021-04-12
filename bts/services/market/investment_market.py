@@ -127,11 +127,15 @@ def issue_fund(request):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
     if issue_price <= 0:
         return HttpResponseBadRequest('invalid parameter')
-    new_fund = Fund(fund_name=fund_name, issue_date=issue_date, issue_price=issue_price)
-    new_fund.save()
-    FundPriceRecord(fund_id=new_fund.fund_id, record_date=issue_date, price=issue_price).save()
-    response_data = {'msg': 'issue fund success', 'fund_id': new_fund.fund_id}
-    return HttpResponse(json.dumps(response_data))
+    try:
+        Fund.objects.get(fund_name=fund_name)
+        return HttpResponseBadRequest('product name already used')
+    except Fund.DoesNotExist:
+        new_fund = Fund(fund_name=fund_name, issue_date=issue_date, issue_price=issue_price)
+        new_fund.save()
+        FundPriceRecord(fund_id=new_fund.fund_id, record_date=issue_date, price=issue_price).save()
+        response_data = {'msg': 'issue fund success', 'fund_id': new_fund.fund_id}
+        return HttpResponse(json.dumps(response_data))
 
 
 def issue_stock(request):
@@ -146,11 +150,15 @@ def issue_stock(request):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
     if issue_price <= 0:
         return HttpResponseBadRequest('invalid parameter')
-    new_stock = Stock(stock_name=stock_name, issue_date=issue_date, issue_price=issue_price)
-    new_stock.save()
-    StockPriceRecord(stock_id=new_stock.stock_id, record_date=issue_date, price=issue_price).save()
-    response_data = {'msg': 'issue stock success', 'stock_id': new_stock.stock_id}
-    return HttpResponse(json.dumps(response_data))
+    try:
+        Stock.objects.get(stock_name=stock_name)
+        return HttpResponseBadRequest('product name already used')
+    except Stock.DoesNotExist:
+        new_stock = Stock(stock_name=stock_name, issue_date=issue_date, issue_price=issue_price)
+        new_stock.save()
+        StockPriceRecord(stock_id=new_stock.stock_id, record_date=issue_date, price=issue_price).save()
+        response_data = {'msg': 'issue stock success', 'stock_id': new_stock.stock_id}
+        return HttpResponse(json.dumps(response_data))
 
 
 def issue_regular_deposit(request):
@@ -166,11 +174,15 @@ def issue_regular_deposit(request):
         return HttpResponseBadRequest('parameter missing or invalid parameter')
     if return_rate <= 0 or return_rate > 0.2 or return_cycle < 7:
         return HttpResponseBadRequest('invalid parameter')
-    new_regular_deposit = RegularDeposit(regular_deposit_name=regular_deposit_name,
-                                         issue_date=issue_date,
-                                         return_cycle=return_cycle,
-                                         return_rate=return_rate)
-    new_regular_deposit.save()
-    response_data = {'msg': 'issue regular deposit success',
-                     'regular_deposit_id': new_regular_deposit.regular_deposit_id}
-    return HttpResponse(json.dumps(response_data))
+    try:
+        RegularDeposit.objects.get(regular_deposit_name=regular_deposit_name)
+        return HttpResponseBadRequest('product name already used')
+    except RegularDeposit.DoesNotExist:
+        new_regular_deposit = RegularDeposit(regular_deposit_name=regular_deposit_name,
+                                             issue_date=issue_date,
+                                             return_cycle=return_cycle,
+                                             return_rate=return_rate)
+        new_regular_deposit.save()
+        response_data = {'msg': 'issue regular deposit success',
+                         'regular_deposit_id': new_regular_deposit.regular_deposit_id}
+        return HttpResponse(json.dumps(response_data))

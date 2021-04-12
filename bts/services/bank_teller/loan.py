@@ -56,36 +56,6 @@ def request_loan(request):
     return HttpResponse(json.dumps(response_data))
 
 
-def query_loan_record_by_id(request):
-    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
-        return HttpResponse(content='Unauthorized', status=401)
-
-    try:
-        loan_record_id = int(request.GET['loan_record_id'])
-        loan_record = LoanRecord.objects.get(loan_record_id=loan_record_id)
-    except (KeyError, ValueError, TypeError, LoanRecord.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
-    return HttpResponse(json.dumps(loan_record.to_dict()))
-
-
-def query_loan_record_by_customer_id(request):
-    if not fetch_bank_teller_by_token(request.META[TOKEN_HEADER_KEY]):
-        return HttpResponse(content='Unauthorized', status=401)
-
-    try:
-        customer_id = int(request.GET['customer_id'])
-        customer = Customer.objects.get(customer_id=customer_id)
-    except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
-
-    response_data = []
-    for loan_record in customer.loanrecord_set.all():
-        _calculate_fine(loan_record)
-        response_data.append(loan_record.to_dict())
-
-    return HttpResponse(json.dumps(response_data))
-
-
 def _loan_repay(loan_record: LoanRecord, repay):
     new_loan_repay = LoanRepay(loan_record=loan_record,
                                left_payment_before=loan_record.left_payment,

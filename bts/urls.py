@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import views
 from .services.system import account, customer
-from .services.bank_teller import deposit
+from .services.bank_teller import deposit, loan_query
 from .services.bank_teller import loan
 from .services.bank_teller import investment, investment_query
 from .services.market import investment_market
@@ -32,9 +32,9 @@ urlpatterns = [
     # 客户贷款
     path('loan/request_loan', loan.request_loan, name='request_loan'),
     # 通过贷款记录ID查询贷款
-    path('loan/query_by_record_id', loan.query_loan_record_by_id, name='query_loan_record_by_id'),
+    path('loan/query_by_record_id', loan_query.query_loan_record_by_id, name='query_loan_record_by_id'),
     # 通过客户ID查询客户贷款记录
-    path('loan/query_by_customer_id', loan.query_loan_record_by_customer_id,
+    path('loan/query_by_customer_id', loan_query.query_loan_record_by_customer_id,
          name='query_loan_record_by_customer_id'),
     # 贷款还款
     path('loan/repay', loan.loan_repay, name='loan_repay'),
@@ -77,7 +77,7 @@ urlpatterns = [
     # 发行基金
     path('market/issue_fund', investment_market.issue_fund, name='issue_fund'),
     # 发行股票
-    path('market/issue_stock', investment_market.issue_fund, name='issue_stock'),
+    path('market/issue_stock', investment_market.issue_stock, name='issue_stock'),
     # 发行定期理财产品
-    path('market/issue_regular_deposit', investment_market.issue_fund, name='issue_regular_deposit'),
+    path('market/issue_regular_deposit', investment_market.issue_regular_deposit, name='issue_regular_deposit'),
 ]
