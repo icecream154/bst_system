@@ -106,8 +106,8 @@ def auto_repay_process(request):
     load_record_query_set = LoanRecord.objects.all()
     for loan_record in load_record_query_set:
         _calculate_fine(loan_record)
-        if loan_record.left_payment > 0 and datetime.now() >= loan_record.due_date:
-            customer = Customer.objects.get(customer_id=loan_record.customer)
+        if loan_record.left_payment > 0 and datetime.now().date() >= loan_record.due_date:
+            customer = Customer.objects.get(customer=loan_record.customer)
             curr_repay = 0
             left_payment_before = loan_record.left_payment
             left_fine_before = loan_record.left_fine
@@ -120,11 +120,11 @@ def auto_repay_process(request):
                     customer.deposit -= loan_record.left_payment
                     loan_record.left_payment = 0
 
-        if curr_repay > 0:
-            new_loan_repay = LoanRepay(loan_record=loan_record,
-                                       left_payment_before=left_payment_before,
-                                       left_fine_before=left_fine_before,
-                                       repay=curr_repay)
+            if curr_repay > 0:
+                new_loan_repay = LoanRepay(loan_record=loan_record,
+                                           left_payment_before=left_payment_before,
+                                           left_fine_before=left_fine_before,
+                                           repay=curr_repay)
             loan_record.save()
             customer.save()
             new_loan_repay.save()
