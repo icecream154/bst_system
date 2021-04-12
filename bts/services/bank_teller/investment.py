@@ -106,7 +106,7 @@ def buy_regular_deposit(request):
     RegularDepositInvestment(customer=customer, regular_deposit=regular_deposit,
                              purchase_date=purchase_date,
                              due_date=purchase_date + timedelta(days=regular_deposit.return_cycle),
-                             purchase_amount=purchase_amount).save()
+                             purchase_amount=purchase_amount, current_deposit=customer.deposit).save()
     response_data = {'msg': 'purchase success'}
     return HttpResponse(json.dumps(response_data))
 
@@ -144,14 +144,14 @@ def buy_fund(request):
     if not fund_price:
         return HttpResponseForbidden('invalid purchase')
 
+    customer.deposit -= purchase_amount
+    customer.save()
     fund_investment = FundInvestment(customer=customer, fund=fund,
                                      position_share=purchase_amount / fund_price,
                                      purchase_amount=purchase_amount,
                                      purchase_date=purchase_date,
-                                     due_date=purchase_date + timedelta(days=return_cycle))
-
-    customer.deposit -= purchase_amount
-    customer.save()
+                                     due_date=purchase_date + timedelta(days=return_cycle),
+                                     current_deposit=customer.deposit)
     fund_investment.save()
     response_data = {'msg': 'fund purchase success'}
     return HttpResponse(json.dumps(response_data))
@@ -197,7 +197,8 @@ def buy_stock(request):
         stock_investment = StockInvestment(customer=customer, stock=stock,
                                            position_share=new_position_share,
                                            purchase_date=purchase_date,
-                                           cumulative_purchase_amount=purchase_amount)
+                                           cumulative_purchase_amount=purchase_amount,
+                                           current_deposit=customer.deposit - purchase_amount)
 
     customer.deposit -= purchase_amount
     customer.save()

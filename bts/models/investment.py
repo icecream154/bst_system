@@ -21,6 +21,8 @@ class FundInvestment(models.Model):
     purchase_date = models.DateField(default=timezone.now)
     # 到期时间
     due_date = models.DateField()
+    # 买入后账户余额
+    current_deposit = models.FloatField()
 
     def to_dict(self):
         dictionary = {
@@ -29,7 +31,8 @@ class FundInvestment(models.Model):
             'position_share': self.position_share,
             'purchase_amount': self.purchase_amount,
             'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
-            'due_date': self.due_date.strftime('%Y-%m-%d')
+            'due_date': self.due_date.strftime('%Y-%m-%d'),
+            'current_deposit': self.current_deposit,
         }
         return dictionary
 
@@ -48,6 +51,8 @@ class StockInvestment(models.Model):
     cumulative_purchase_amount = models.FloatField()
     # 最早买入时间
     purchase_date = models.DateField(default=timezone.now)
+    # 买入后账户余额
+    current_deposit = models.FloatField()
 
     def to_dict(self):
         dictionary = {
@@ -55,7 +60,8 @@ class StockInvestment(models.Model):
             'stock_id': self.stock.stock_id,
             'position_share': self.position_share,
             'cumulative_purchase_amount': self.cumulative_purchase_amount,
-            'purchase_date': self.purchase_date.strftime('%Y-%m-%d')
+            'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
+            'current_deposit': self.current_deposit,
         }
         return dictionary
 
@@ -74,6 +80,8 @@ class RegularDepositInvestment(models.Model):
     purchase_date = models.DateField(default=timezone.now)
     # 到期时间
     due_date = models.DateField()
+    # 买入后账户余额
+    current_deposit = models.FloatField()
 
     def to_dict(self):
         dictionary = {
@@ -81,7 +89,8 @@ class RegularDepositInvestment(models.Model):
             'regular_deposit_id': self.regular_deposit.regular_deposit_id,
             'purchase_amount': self.purchase_amount,
             'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
-            'due_date': self.due_date.strftime('%Y-%m-%d')
+            'due_date': self.due_date.strftime('%Y-%m-%d'),
+            'current_deposit': self.current_deposit,
         }
         return dictionary
 
