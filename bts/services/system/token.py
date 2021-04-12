@@ -6,7 +6,7 @@ from bts.models.bank_teller import BankTeller
 token_dict = {}
 # default expire time set to 10800 seconds (3 hour)
 _EXPIRE_TIME = 10800
-TOKEN_HEADER_KEY = 'HTTP_TOKEN'
+TOKEN_HEADER_KEY = 'AUTHORIZATION'
 
 
 def _get_token_by_id(token_dictionary: {str: (BankTeller, float)}, bank_teller_id: int):
