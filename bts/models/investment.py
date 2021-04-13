@@ -51,7 +51,7 @@ class StockInvestment(models.Model):
     cumulative_purchase_amount = models.FloatField()
     # 最早买入时间
     purchase_date = models.DateField(default=timezone.now)
-    # 买入后账户余额
+    # 最近一次买入后账户余额
     current_deposit = models.FloatField()
 
     def to_dict(self):
@@ -60,6 +60,35 @@ class StockInvestment(models.Model):
             'stock_id': self.stock.stock_id,
             'position_share': self.position_share,
             'cumulative_purchase_amount': self.cumulative_purchase_amount,
+            'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
+            'current_deposit': self.current_deposit,
+        }
+        return dictionary
+
+
+class StockInvestmentRecord(models.Model):
+    """
+    用户历史股票买入情况
+    """
+    # 所属客户
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    # 所属股票
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    # 买入股数(股数只能是整数)
+    position_share = models.IntegerField()
+    # 买入金额 （买入金额应该为买入时间的股票价格乘以股数）
+    purchase_amount = models.FloatField()
+    # 买入时间
+    purchase_date = models.DateField(default=timezone.now)
+    # 买入后账户余额
+    current_deposit = models.FloatField()
+
+    def to_dict(self):
+        dictionary = {
+            'customer_id': self.customer.customer_id,
+            'stock_id': self.stock.stock_id,
+            'position_share': self.position_share,
+            'purchase_amount': self.purchase_amount,
             'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
             'current_deposit': self.current_deposit,
         }

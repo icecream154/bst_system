@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.http import HttpResponse, HttpResponseBadRequest, Http404, HttpResponseForbidden
 
 from bts.models.customer import Customer
-from bts.models.investment import RegularDepositInvestment, FundInvestment, StockInvestment
+from bts.models.investment import RegularDepositInvestment, FundInvestment, StockInvestment, StockInvestmentRecord
 from bts.models.loan import LoanRecord
 from bts.models.products import RegularDeposit, Fund, Stock
 from bts.services.bank_teller.loan import _loan_repay
@@ -189,18 +189,21 @@ def buy_stock(request):
     if _get_customer_credit(customer)['credit_level'] > Credit.Credit_Primary_Account:
         return HttpResponseForbidden('credit level forbidden')
 
+    customer.deposit -= purchase_amount
     try:
         stock_investment = StockInvestment.objects.get(customer=customer, stock=stock)
         stock_investment.cumulative_purchase_amount += purchase_amount
         stock_investment.position_share += new_position_share
+        stock_investment.current_deposit = customer.deposit
     except StockInvestment.DoesNotExist:
         stock_investment = StockInvestment(customer=customer, stock=stock,
                                            position_share=new_position_share,
                                            purchase_date=purchase_date,
                                            cumulative_purchase_amount=purchase_amount,
-                                           current_deposit=customer.deposit - purchase_amount)
-
-    customer.deposit -= purchase_amount
+                                           current_deposit=customer.deposit)
+    StockInvestmentRecord(customer=customer, stock=stock, position_share=new_position_share,
+                          purchase_date=purchase_date, purchase_amount=purchase_amount,
+                          current_deposit=customer.deposit).save()
     customer.save()
     stock_investment.save()
     response_data = {'msg': 'stock purchase success'}

@@ -6,7 +6,7 @@ from .services.bank_teller import deposit, loan_query
 from .services.bank_teller import loan
 from .services.bank_teller import investment, investment_query
 from .services.market import investment_market
-from .services.record_query import deposit_record, repay_record
+from .services.record_query import deposit_record, repay_record, stock_investment_record
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -87,4 +87,7 @@ urlpatterns = [
     path('record_query/deposit', deposit_record.query_deposits_by_customer_id, name='query_deposits_by_customer_id'),
     # 查询还款记录
     path('record_query/repay', repay_record.query_repays_by_customer_id, name='query_repays_by_customer_id'),
+    # 查询客户买入股票的记录
+    path('record_query/stock_investment', stock_investment_record.query_stock_investment_record_by_customer_id,
+         name='query_stock_investment_record_by_customer_id')
 ]
