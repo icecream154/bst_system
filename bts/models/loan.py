@@ -7,7 +7,7 @@ from bts.models.customer import Customer
 class LoanRecord(models.Model):
     # 贷款记录ID
     loan_record_id = models.AutoField(primary_key=True)
-    # 客户ID
+    # 所属客户
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     # 贷款金额
     payment = models.FloatField()
