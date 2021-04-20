@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta, date
 
-from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpResponse, Http404, HttpResponseBadRequest
 
 from bts.models.customer import Customer
 from bts.models.loan import LoanRecord, LoanRepay
