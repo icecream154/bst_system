@@ -115,6 +115,7 @@ def show_info(status_code: int, response_dict: dict):
     print('status_code[%d] and response: [%s]' % (status_code, response_dict))
 
 
+# 数据库初始化脚本
 if __name__ == '__main__':
     # 注册两个柜员
     status_code, response_dict = sys_register('BTS1', 'imbus123', '柜员一', '13966667777')
