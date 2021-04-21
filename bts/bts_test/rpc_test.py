@@ -1,29 +1,4 @@
-import requests
-import json
-
-BST_BASE_URL = 'http://localhost:8000/bts'
-
-
-def do_request(request_type: str, url: str, params: dict = None, headers: dict = None, data: dict = None):
-    response = requests.request(request_type, BST_BASE_URL + url, params=params, headers=headers, data=data)
-    # print(response.request.headers)
-    response_dict = None
-    if response.status_code == 200:
-        try:
-            response_dict = json.loads(response.text)
-        except json.decoder.JSONDecodeError as ex:
-            print(ex)
-    elif response.status_code != 404:
-        response_dict = response.text
-    return response.status_code, response_dict
-
-
-def do_get_request(url: str, params: dict = None, headers: dict = None, data: dict = None):
-    return do_request('GET', url, params, headers, data)
-
-
-def do_post_request(url: str, params: dict = None, headers: dict = None, data: dict = None):
-    return do_request('POST', url, params, headers, data)
+from bts.bts_test.rpc_utils import do_get_request, do_post_request
 
 
 def sys_register(account: str, password: str, name: str, phone: str):
@@ -55,30 +30,34 @@ def query_customer_by_id_number(token: str, id_number: str):
 # 客户存款
 def customer_deposit(token: str, customer_id: int, new_deposit: float):
     return do_post_request('/deposit', headers={'authorization': token}, data={'customer_id': customer_id,
-                                                                       'new_deposit': new_deposit})
+                                                                               'new_deposit': new_deposit})
+
 
 # 客户贷款
 def customer_loan(token: str, customer_id: int, payment: float, repay_cycle: int, created_time: str):
     return do_post_request('/loan/request_loan', headers={'authorization': token}, data={'customer_id': customer_id,
-                                                                                 'payment': payment,
-                                                                                 'repay_cycle': repay_cycle,
-                                                                                 'created_time': created_time})
+                                                                                         'payment': payment,
+                                                                                         'repay_cycle': repay_cycle,
+                                                                                         'created_time': created_time})
 
 
 # 查询指定ID的贷款记录
 def loan_query_record_by_id(token: str, loan_record_id: int):
-    return do_get_request('/loan/query_by_record_id',  headers={'authorization': token},
+    return do_get_request('/loan/query_by_record_id', headers={'authorization': token},
                           params={'loan_record_id': loan_record_id})
+
 
 # 查询客户的所有贷款
 def loan_query_record_by_customer_id(token: str, customer_id: int):
-    return do_get_request('/loan/query_by_customer_id', headers={'authorization': token}, params={'customer_id': customer_id})
+    return do_get_request('/loan/query_by_customer_id', headers={'authorization': token},
+                          params={'customer_id': customer_id})
 
 
 # 客户进行贷款还款
 def customer_loan_repay(token: str, loan_record_id: int, repay: float):
     return do_post_request('/loan/repay', headers={'authorization': token}, data={'loan_record_id': loan_record_id,
-                                                                          'repay': repay})
+                                                                                  'repay': repay})
+
 
 # 发起日终处理
 def loan_auto_repay():
@@ -117,7 +96,7 @@ def buy_regular_deposit(token: str, customer_id: int, regular_deposit_id: int,
 
 # 购买基金产品
 def buy_fund(token: str, customer_id: int, fund_id: int,
-                        purchase_amount: float, purchase_date: str, return_cycle: int):
+             purchase_amount: float, purchase_date: str, return_cycle: int):
     return do_post_request('/investment/buy_fund', headers={'authorization': token},
                            data={'customer_id': customer_id, 'fund_id': fund_id,
                                  'purchase_amount': purchase_amount, 'purchase_date': purchase_date,
@@ -126,10 +105,11 @@ def buy_fund(token: str, customer_id: int, fund_id: int,
 
 # 购买股票产品
 def buy_stock(token: str, customer_id: int, stock_id: int,
-                        new_position_share: float, purchase_date: str):
+              new_position_share: float, purchase_date: str):
     return do_post_request('/investment/buy_stock', headers={'authorization': token},
                            data={'customer_id': customer_id, 'stock_id': stock_id,
                                  'new_position_share': new_position_share, 'purchase_date': purchase_date})
+
 
 def show_info(status_code: int, response_dict: dict):
     print('status_code[%d] and response: [%s]' % (status_code, response_dict))
