@@ -4,6 +4,7 @@ from datetime import timedelta, datetime
 
 from django.http import HttpResponseBadRequest, HttpResponse, Http404
 
+from bts.models.constants import DATE_TIME_FORMAT, EM_INVALID_OR_MISSING_PARAMETERS
 from bts.models.products import FundPriceRecord, StockPriceRecord, Fund, Stock, RegularDeposit
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 from bts.utils.request_processor import fetch_parameter_dict
@@ -27,7 +28,7 @@ def query_funds(request):
     try:
         fund_id = int(request.GET['product_id'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     return _query_products(fund_id, Fund)
 
 
@@ -35,7 +36,7 @@ def query_stocks(request):
     try:
         stock_id = int(request.GET['product_id'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     return _query_products(stock_id, Stock)
 
 
@@ -43,7 +44,7 @@ def query_regular_deposits(request):
     try:
         regular_deposit_id = int(request.GET['product_id'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     return _query_products(regular_deposit_id, RegularDeposit)
 
 
@@ -84,34 +85,34 @@ def get_stock_price_from_market(stock: Stock, search_date):
 def get_fund_price(request):
     try:
         fund_id = int(request.GET['fund_id'])
-        search_date = datetime.strptime(request.GET['search_date'], '%Y-%m-%d').date()
+        search_date = datetime.strptime(request.GET['search_date'], DATE_TIME_FORMAT).date()
         fund = Fund.objects.get(fund_id=fund_id)
     except (KeyError, ValueError, TypeError, Fund.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     except Exception as ex:
         print(ex)
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     response_data = {'price': get_fund_price_from_market(fund, search_date)}
     if not response_data['price']:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     return HttpResponse(json.dumps(response_data))
 
 
 def get_stock_price(request):
     try:
         stock_id = int(request.GET['stock_id'])
-        search_date = datetime.strptime(request.GET['search_date'], '%Y-%m-%d').date()
+        search_date = datetime.strptime(request.GET['search_date'], DATE_TIME_FORMAT).date()
         stock = Stock.objects.get(stock_id=stock_id)
     except (KeyError, ValueError, TypeError, Stock.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     except Exception as ex:
         print(ex)
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     response_data = {'price': get_stock_price_from_market(stock, search_date)}
     if not response_data['price']:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     return HttpResponse(json.dumps(response_data))
 
 
@@ -121,15 +122,15 @@ def issue_fund(request):
     try:
         parameter_dict = fetch_parameter_dict(request, 'POST')
         fund_name = parameter_dict['fund_name']
-        issue_date = datetime.strptime(parameter_dict['issue_date'], '%Y-%m-%d').date()
+        issue_date = datetime.strptime(parameter_dict['issue_date'], DATE_TIME_FORMAT).date()
         issue_price = float(parameter_dict['issue_price'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     if issue_price <= 0:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     try:
         Fund.objects.get(fund_name=fund_name)
-        return HttpResponseBadRequest('product name already used')
+        return HttpResponseBadRequest(EM_PRODUCT_NAME_USED)
     except Fund.DoesNotExist:
         new_fund = Fund(fund_name=fund_name, issue_date=issue_date, issue_price=issue_price)
         new_fund.save()
@@ -144,15 +145,15 @@ def issue_stock(request):
     try:
         parameter_dict = fetch_parameter_dict(request, 'POST')
         stock_name = parameter_dict['stock_name']
-        issue_date = datetime.strptime(parameter_dict['issue_date'], '%Y-%m-%d').date()
+        issue_date = datetime.strptime(parameter_dict['issue_date'], DATE_TIME_FORMAT).date()
         issue_price = float(parameter_dict['issue_price'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     if issue_price <= 0:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     try:
         Stock.objects.get(stock_name=stock_name)
-        return HttpResponseBadRequest('product name already used')
+        return HttpResponseBadRequest(EM_PRODUCT_NAME_USED)
     except Stock.DoesNotExist:
         new_stock = Stock(stock_name=stock_name, issue_date=issue_date, issue_price=issue_price)
         new_stock.save()
@@ -167,16 +168,16 @@ def issue_regular_deposit(request):
     try:
         parameter_dict = fetch_parameter_dict(request, 'POST')
         regular_deposit_name = parameter_dict['regular_deposit_name']
-        issue_date = datetime.strptime(parameter_dict['issue_date'], '%Y-%m-%d').date()
+        issue_date = datetime.strptime(parameter_dict['issue_date'], DATE_TIME_FORMAT).date()
         return_cycle = int(parameter_dict['return_cycle'])
         return_rate = float(parameter_dict['return_rate'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     if return_rate <= 0 or return_rate > 0.2 or return_cycle < 7:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     try:
         RegularDeposit.objects.get(regular_deposit_name=regular_deposit_name)
-        return HttpResponseBadRequest('product name already used')
+        return HttpResponseBadRequest(EM_PRODUCT_NAME_USED)
     except RegularDeposit.DoesNotExist:
         new_regular_deposit = RegularDeposit(regular_deposit_name=regular_deposit_name,
                                              issue_date=issue_date,

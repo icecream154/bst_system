@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+from bts.models.constants import DATE_TIME_FORMAT
 from bts.models.products import Fund, Stock, RegularDeposit
 from bts.models.customer import Customer
 
@@ -30,8 +31,8 @@ class FundInvestment(models.Model):
             'fund_id': self.fund.fund_id,
             'position_share': self.position_share,
             'purchase_amount': self.purchase_amount,
-            'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
-            'due_date': self.due_date.strftime('%Y-%m-%d'),
+            'purchase_date': self.purchase_date.strftime(DATE_TIME_FORMAT),
+            'due_date': self.due_date.strftime(DATE_TIME_FORMAT),
             'current_deposit': self.current_deposit,
         }
         return dictionary
@@ -60,7 +61,7 @@ class StockInvestment(models.Model):
             'stock_id': self.stock.stock_id,
             'position_share': self.position_share,
             'cumulative_purchase_amount': self.cumulative_purchase_amount,
-            'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
+            'purchase_date': self.purchase_date.strftime(DATE_TIME_FORMAT),
             'current_deposit': self.current_deposit,
         }
         return dictionary
@@ -89,7 +90,7 @@ class StockInvestmentRecord(models.Model):
             'stock_id': self.stock.stock_id,
             'position_share': self.position_share,
             'purchase_amount': self.purchase_amount,
-            'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
+            'purchase_date': self.purchase_date.strftime(DATE_TIME_FORMAT),
             'current_deposit': self.current_deposit,
         }
         return dictionary
@@ -117,8 +118,8 @@ class RegularDepositInvestment(models.Model):
             'customer_id': self.customer.customer_id,
             'regular_deposit_id': self.regular_deposit.regular_deposit_id,
             'purchase_amount': self.purchase_amount,
-            'purchase_date': self.purchase_date.strftime('%Y-%m-%d'),
-            'due_date': self.due_date.strftime('%Y-%m-%d'),
+            'purchase_date': self.purchase_date.strftime(DATE_TIME_FORMAT),
+            'due_date': self.due_date.strftime(DATE_TIME_FORMAT),
             'current_deposit': self.current_deposit,
         }
         return dictionary

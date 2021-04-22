@@ -78,4 +78,4 @@ class TestAccount(TestCase):
     def test_bank_teller_logout(self):
         status_code, response_dict = sys_login("登录测试", "imbus123")
         token=response_dict['token']
-        
+

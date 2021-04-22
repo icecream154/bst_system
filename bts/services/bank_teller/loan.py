@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, date
 
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 
+from bts.models.constants import DATE_TIME_FORMAT, EM_INVALID_OR_MISSING_PARAMETERS, EM_NO_SUCH_CUSTOMER
 from bts.models.customer import Customer
 from bts.models.loan import LoanRecord, LoanRepay
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
@@ -32,19 +33,19 @@ def request_loan(request):
         # print(parameter_dict['payment'])
         repay_cycle = int(parameter_dict['repay_cycle'])
         # print(parameter_dict['repay_cycle'])
-        created_time = datetime.strptime(parameter_dict['created_time'], '%Y-%m-%d').date()
+        created_time = datetime.strptime(parameter_dict['created_time'], DATE_TIME_FORMAT).date()
         # print(parameter_dict['created_time'])
         customer = Customer.objects.get(customer_id=customer_id)
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     if payment <= 0:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     try:
         Customer.objects.get(customer_id=customer_id)
     except Customer.DoesNotExist:
-        raise Http404('No such customer')
+        raise Http404(EM_NO_SUCH_CUSTOMER)
 
     new_loan_record = LoanRecord(customer=customer, payment=payment, current_deposit=customer.deposit,
                                  repay_cycle=repay_cycle, due_date=created_time + timedelta(days=repay_cycle),
@@ -84,10 +85,10 @@ def loan_repay(request):
         loan_record_id = int(parameter_dict['loan_record_id'])
         repay = float(parameter_dict['repay'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     if repay <= 0:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     try:
         loan_record = LoanRecord.objects.get(loan_record_id=loan_record_id)

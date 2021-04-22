@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+from bts.models.constants import DATE_TIME_FORMAT
 from bts.models.customer import Customer
 
 
@@ -21,7 +22,7 @@ class DepositRecord(models.Model):
             'record_id': self.record_id,
             'customer_id': self.customer.customer_id,
             'customer_id_number': self.customer.id_number,
-            'created_time': self.created_time.strftime('%Y-%m-%d'),
+            'created_time': self.created_time.strftime(DATE_TIME_FORMAT),
             'payment': self.payment,
             'current_deposit': self.current_deposit
         }

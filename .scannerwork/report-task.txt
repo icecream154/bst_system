@@ -1,6 +1,7 @@
-projectKey=bst
+projectKey=bts
 serverUrl=http://localhost:9000
 serverVersion=8.8.0.42792
-dashboardUrl=http://localhost:9000/dashboard?id=bst
-ceTaskId=AXjy87H9MQQ4uWxaJCZ6
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AXjy87H9MQQ4uWxaJCZ6
+dashboardUrl=http://localhost:9000/dashboard?id=bts
+ceTaskId=AXj49JRVoVZY9PuyEbTD
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AXj49JRVoVZY9PuyEbTD
+>>>>>>> a983208c77c083496f41ab093cbd0cf213b78f0a

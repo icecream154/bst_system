@@ -2,6 +2,7 @@ import json
 
 from django.http import HttpResponse, HttpResponseBadRequest
 
+from bts.models.constants import EM_INVALID_OR_MISSING_PARAMETERS
 from bts.models.customer import Customer
 from bts.models.loan import LoanRecord
 from bts.services.bank_teller.loan import _calculate_fine
@@ -16,7 +17,7 @@ def query_loan_record_by_id(request):
         loan_record_id = int(request.GET['loan_record_id'])
         loan_record = LoanRecord.objects.get(loan_record_id=loan_record_id)
     except (KeyError, ValueError, TypeError, LoanRecord.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     return HttpResponse(json.dumps(loan_record.to_dict()))
 
 
@@ -28,7 +29,7 @@ def query_loan_record_by_customer_id(request):
         customer_id = int(request.GET['customer_id'])
         customer = Customer.objects.get(customer_id=customer_id)
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     response_data = []
     for loan_record in customer.loanrecord_set.all():
