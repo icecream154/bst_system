@@ -1,13 +1,20 @@
 from bts.bts_test.rpc_utils import do_get_request, do_post_request
 
 
-def sys_register(account: str, password: str, name: str, phone: str):
-    return do_post_request('/system/register', data={'account': account, 'password': password,
-                                                     'name': name, 'phone': phone})
+def sys_register(account: str, password: str, name: str, phone: str = None):
+    if phone is not None:
+        return do_post_request('/system/register', data={'account': account, 'password': password,
+                                                         'name': name, 'phone': phone})
+    else:
+        return do_post_request('/system/register', data={'account': account, 'password': password,
+                                                         'name': name})
 
 
-def sys_login(username: str, password: str):
-    params_dict = {'account': username, 'password': password}
+def sys_login(username: str, password: str = None):
+    if password is not None:
+        params_dict = {'account': username, 'password': password}
+    else:
+        params_dict = {'account': username}
     return do_post_request('/system/login', data=params_dict)
 
 
@@ -162,7 +169,7 @@ if __name__ == '__main__':
     show_info(status_code, response_dict)
 
     # 发行定期理财产品
-    status_code, response_dict = issue_regular_deposit(bt_token, '定期理财一号', '2021-3-9', '9', 0.07)
+    status_code, response_dict = issue_regular_deposit(bt_token, '定期理财一号', '2021-3-9', 9, 0.07)
     show_info(status_code, response_dict)
     new_regular_deposit_id = response_dict['regular_deposit_id']
 

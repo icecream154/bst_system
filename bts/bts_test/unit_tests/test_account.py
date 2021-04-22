@@ -1,15 +1,81 @@
-from unittest import TestCase
+import os, django
+
+from django.test import TestCase
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
+django.setup()
 
 from bts.bts_test.rpc_test import sys_register, sys_login
 
+from bts.services.system import account
+
+from django.http import HttpRequest, HttpResponse
+
+import json
+
+from django.test import Client
+
 
 class TestAccount(TestCase):
+    def setUp(self):
+        self.client = Client()
+        sys_register("登录测试", "imbus123", "柜员四", "13966667777")
+
     def test_bank_teller_register(self):
-        status_code, response_dict = sys_register('BTS1', 'imbus123', '柜员一', '13966667777')
+        # request = HttpRequest()
+        # request.method = "POST"
+        # request.META = {"CONTENT_TYPE": "application/json"}
+        # request._body = json.dumps({"account": "BTS3", "password": "imbus123", "name": "柜员三", "phone": "13966667777"}).encode("UTF-8")
+        # response = account.bank_teller_register(request)
+        # status_code = response.status_code
+        # response_dict = json.loads(response.content.decode("utf8"))
+
+        # response = self.client.post('http://localhost:8000/bts/system/register',
+        #                             data={"account": "BTS3", "password": "imbus123", "name": "柜员三",
+        #                                   "phone": "13966667777"})
+
+        # 正确注册测试
+        status_code, response_dict = sys_register("注册测试", "imbus123", "柜员三", "13966667777")
         self.assertEqual(200, status_code)
+        self.assertEqual("register bank teller success", response_dict["msg"])
+
+        # 缺少参数注册测试
+        status_code, response_dict = sys_register("注册测试", "imbus123", "柜员三")
+        self.assertEqual(400, status_code)
+        self.assertEqual("parameter missing or invalid parameter", response_dict)
+
+        # 密码过于简单测试
+        status_code, response_dict = sys_register("注册测试", "i", "柜员三", "13966667777")
+        self.assertEqual(403, status_code)
+        self.assertEqual("password not accepted, too simple", response_dict)
+
+        # 账户已存在测试
+        status_code, response_dict = sys_register("注册测试", "imbus123", "柜员三", "13966667777")
+        self.assertEqual(403, status_code)
+        self.assertEqual("account already exist", response_dict)
 
     def test_bank_teller_login(self):
-        self.fail()
+        # 正确登录测试
+        status_code, response_dict = sys_login("登录测试", "imbus123")
+        self.assertEqual(200, status_code)
+        self.assertTrue(response_dict['token'])
+
+        # 缺少参数登录测试
+        status_code, response_dict = sys_login("登录测试")
+        self.assertEqual(400, status_code)
+        self.assertEqual("parameter missing or invalid parameter", response_dict)
+
+        # 用户不存在登录测试
+        status_code, response_dict = sys_login("登录测试1", "imbus123")
+        self.assertEqual(403, status_code)
+        self.assertEqual("account doesn't exist", response_dict)
+
+        # 密码错误登录测试
+        status_code, response_dict = sys_login("登录测试", "imbus12")
+        self.assertEqual(403, status_code)
+        self.assertEqual("wrong password", response_dict)
 
     def test_bank_teller_logout(self):
-        self.fail()
+        status_code, response_dict = sys_login("登录测试", "imbus123")
+        token=response_dict['token']
+        

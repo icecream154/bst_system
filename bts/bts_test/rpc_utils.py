@@ -1,20 +1,32 @@
 import requests
 import json
+from django.test import Client
 
 BST_BASE_URL = 'http://localhost:8000/bts'
 
 
 def do_request(request_type: str, url: str, params: dict = None, headers: dict = None, data: dict = None):
-    response = requests.request(request_type, BST_BASE_URL + url, params=params, headers=headers, data=data)
-    # print(response.request.headers)
-    response_dict = None
+    # response = requests.request(request_type, BST_BASE_URL + url, params=params, headers=headers, data=data)
+    # response_dict = None
+    # if response.status_code == 200:
+    #     try:
+    #         response_dict = json.loads(response.text)
+    #     except json.decoder.JSONDecodeError as ex:
+    #         print(ex)
+    # elif response.status_code != 404:
+    #     response_dict = response.text
+    # return response.status_code, response_dict
+
+    client = Client()
+    if request_type == "POST":
+        response = client.post(BST_BASE_URL + url,
+                               data=data)
+    else:
+        response = client.get(BST_BASE_URL + url,
+                              data=data)
+    response_dict = response.content.decode('utf-8')
     if response.status_code == 200:
-        try:
-            response_dict = json.loads(response.text)
-        except json.decoder.JSONDecodeError as ex:
-            print(ex)
-    elif response.status_code != 404:
-        response_dict = response.text
+        response_dict = json.loads(response_dict)
     return response.status_code, response_dict
 
 
