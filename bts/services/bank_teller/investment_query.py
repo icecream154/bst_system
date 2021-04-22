@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from django.http import HttpResponse, HttpResponseBadRequest
 
+from bts.models.constants import DATE_TIME_FORMAT, INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE
 from bts.models.customer import Customer
 from bts.models.investment import FundInvestment, StockInvestment, RegularDepositInvestment
 from bts.models.products import RegularDeposit, Fund, Stock
@@ -15,9 +16,9 @@ def query_customer_fund_invest(request):
 
     try:
         customer = Customer.objects.get(customer_id=int(request.GET['customer_id']))
-        query_date = datetime.strptime(request.GET['query_date'], '%Y-%m-%d').date()
+        query_date = datetime.strptime(request.GET['query_date'], DATE_TIME_FORMAT).date()
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     fund_invest_list = _query_customer_product_invest(customer, FundInvestment)
     for fund_invest in fund_invest_list:
@@ -39,9 +40,9 @@ def query_customer_stock_invest(request):
 
     try:
         customer = Customer.objects.get(customer_id=int(request.GET['customer_id']))
-        query_date = datetime.strptime(request.GET['query_date'], '%Y-%m-%d').date()
+        query_date = datetime.strptime(request.GET['query_date'], DATE_TIME_FORMAT).date()
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     stock_invest_list = _query_customer_product_invest(customer, StockInvestment)
     for stock_invest in stock_invest_list:
@@ -63,7 +64,7 @@ def query_customer_regular_deposit_invest(request):
     try:
         customer = Customer.objects.get(customer_id=int(request.GET['customer_id']))
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     regular_deposit_invest_list = _query_customer_product_invest(customer, RegularDepositInvestment)
     for regular_deposit_invest in regular_deposit_invest_list:

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, date
 
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 
+from bts.models.constants import DATE_TIME_FORMAT, INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE
 from bts.models.customer import Customer
 from bts.models.loan import LoanRecord, LoanRepay
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
@@ -32,14 +33,14 @@ def request_loan(request):
         # print(parameter_dict['payment'])
         repay_cycle = int(parameter_dict['repay_cycle'])
         # print(parameter_dict['repay_cycle'])
-        created_time = datetime.strptime(parameter_dict['created_time'], '%Y-%m-%d').date()
+        created_time = datetime.strptime(parameter_dict['created_time'], DATE_TIME_FORMAT).date()
         # print(parameter_dict['created_time'])
         customer = Customer.objects.get(customer_id=customer_id)
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     if payment <= 0:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     try:
         Customer.objects.get(customer_id=customer_id)
@@ -84,10 +85,10 @@ def loan_repay(request):
         loan_record_id = int(parameter_dict['loan_record_id'])
         repay = float(parameter_dict['repay'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     if repay <= 0:
-        return HttpResponseBadRequest('invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     try:
         loan_record = LoanRecord.objects.get(loan_record_id=loan_record_id)

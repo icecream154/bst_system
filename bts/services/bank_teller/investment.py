@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.db.models import Sum
 from django.http import HttpResponse, HttpResponseBadRequest, Http404, HttpResponseForbidden
 
+from bts.models.constants import DATE_TIME_FORMAT, INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE
 from bts.models.customer import Customer
 from bts.models.investment import RegularDepositInvestment, FundInvestment, StockInvestment, StockInvestmentRecord
 from bts.models.loan import LoanRecord
@@ -15,12 +16,12 @@ from bts.utils.request_processor import fetch_parameter_dict
 
 
 class Credit:
-    Credit_Primary_Account = 1  # 一级账户
-    Credit_Secondary_Account = 2  # 二级账户
-    Credit_Third_Level_Account = 3  # 三级账户
+    CREDIT_PRIMARY_ACCOUNT = 1  # 一级账户
+    CREDIT_SECONDARY_ACCOUNT = 2  # 二级账户
+    CREDIT_THIRD_LEVEL_ACCOUNT = 3  # 三级账户
 
-    Credit_Primary_Account_Limit = 500000.0
-    Credit_Secondary_Account_Limit = 0
+    CREDIT_PRIMARY_ACCOUNT_LIMIT = 500000.0
+    CREDIT_SECONDARY_ACCOUNT_LIMIT = 0
 
 
 def _get_customer_credit(customer: Customer):
@@ -35,12 +36,12 @@ def _get_customer_credit(customer: Customer):
         'total_left_fine': total_left_fine,
         'net_capital': customer.deposit - total_left_payment - total_left_fine
     }
-    if credit_info['net_capital'] > Credit.Credit_Primary_Account_Limit:
-        credit_info['credit_level'] = Credit.Credit_Primary_Account
-    elif credit_info['net_capital'] > Credit.Credit_Secondary_Account_Limit:
-        credit_info['credit_level'] = Credit.Credit_Secondary_Account
+    if credit_info['net_capital'] > Credit.CREDIT_PRIMARY_ACCOUNT_LIMIT:
+        credit_info['credit_level'] = Credit.CREDIT_PRIMARY_ACCOUNT
+    elif credit_info['net_capital'] > Credit.CREDIT_SECONDARY_ACCOUNT_LIMIT:
+        credit_info['credit_level'] = Credit.CREDIT_SECONDARY_ACCOUNT
     else:
-        credit_info['credit_level'] = Credit.Credit_Third_Level_Account
+        credit_info['credit_level'] = Credit.CREDIT_THIRD_LEVEL_ACCOUNT
 
     return credit_info
 
@@ -52,7 +53,7 @@ def get_customer_credit(request):
     try:
         customer_id = int(request.GET['customer_id'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
@@ -84,9 +85,9 @@ def buy_regular_deposit(request):
         customer_id = int(parameter_dict['customer_id'])
         regular_deposit_id = int(parameter_dict['regular_deposit_id'])
         purchase_amount = float(parameter_dict['purchase_amount'])
-        purchase_date = datetime.strptime(parameter_dict['purchase_date'], '%Y-%m-%d').date()
+        purchase_date = datetime.strptime(parameter_dict['purchase_date'], DATE_TIME_FORMAT).date()
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
@@ -120,10 +121,10 @@ def buy_fund(request):
         customer_id = int(parameter_dict['customer_id'])
         fund_id = int(parameter_dict['fund_id'])
         purchase_amount = float(parameter_dict['purchase_amount'])
-        purchase_date = datetime.strptime(parameter_dict['purchase_date'], '%Y-%m-%d').date()
+        purchase_date = datetime.strptime(parameter_dict['purchase_date'], DATE_TIME_FORMAT).date()
         return_cycle = int(parameter_dict['return_cycle'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
@@ -137,7 +138,7 @@ def buy_fund(request):
         return HttpResponseForbidden('cannot pay fine')
     if customer.deposit < purchase_amount:
         return HttpResponseForbidden('deposit not enough for purchase amount')
-    if _get_customer_credit(customer)['credit_level'] > Credit.Credit_Secondary_Account:
+    if _get_customer_credit(customer)['credit_level'] > Credit.CREDIT_SECONDARY_ACCOUNT:
         return HttpResponseForbidden('credit level forbidden')
 
     fund_price = get_fund_price_from_market(fund, purchase_date)
@@ -166,9 +167,9 @@ def buy_stock(request):
         customer_id = int(parameter_dict['customer_id'])
         stock_id = int(parameter_dict['stock_id'])
         new_position_share = int(parameter_dict['new_position_share'])  # 新买入的股数
-        purchase_date = datetime.strptime(parameter_dict['purchase_date'], '%Y-%m-%d').date()
+        purchase_date = datetime.strptime(parameter_dict['purchase_date'], DATE_TIME_FORMAT).date()
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
@@ -186,7 +187,7 @@ def buy_stock(request):
     purchase_amount = stock_price * new_position_share
     if customer.deposit < purchase_amount:
         return HttpResponseForbidden('deposit not enough for purchase amount')
-    if _get_customer_credit(customer)['credit_level'] > Credit.Credit_Primary_Account:
+    if _get_customer_credit(customer)['credit_level'] > Credit.CREDIT_PRIMARY_ACCOUNT:
         return HttpResponseForbidden('credit level forbidden')
 
     customer.deposit -= purchase_amount

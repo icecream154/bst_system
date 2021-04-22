@@ -20,7 +20,7 @@ def add_customer(request):
         id_number = parameter_dict['id_number']
         deposit = float(parameter_dict['deposit'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
 
     try:
         Customer.objects.get(id_number=id_number)
@@ -42,6 +42,6 @@ def query_customer_by_id_number(request):
         customer = Customer.objects.get(id_number=request.GET['id_number'])
         return HttpResponse(json.dumps(customer.to_dict()))
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest('parameter missing or invalid parameter')
+        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
     except Customer.DoesNotExist:
         raise Http404('No such customer')

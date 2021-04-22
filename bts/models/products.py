@@ -1,6 +1,8 @@
 import django.utils.timezone as timezone
 from django.db import models
 
+from bts.models.constants import DATE_TIME_FORMAT
+
 
 class Fund(models.Model):
     # 基金ID
@@ -16,7 +18,7 @@ class Fund(models.Model):
         dictionary = {
             'fund_id': self.fund_id,
             'fund_name': self.fund_name,
-            'issue_date': self.issue_date.strftime('%Y-%m-%d'),
+            'issue_date': self.issue_date.strftime(DATE_TIME_FORMAT),
             'issue_price': self.issue_price
         }
         return dictionary
@@ -36,7 +38,7 @@ class Stock(models.Model):
         dictionary = {
             'stock_id': self.stock_id,
             'stock_name': self.stock_name,
-            'issue_date': self.issue_date.strftime('%Y-%m-%d'),
+            'issue_date': self.issue_date.strftime(DATE_TIME_FORMAT),
             'issue_price': self.issue_price
         }
         return dictionary
@@ -58,7 +60,7 @@ class RegularDeposit(models.Model):
         dictionary = {
             'regular_deposit_id': self.regular_deposit_id,
             'regular_deposit_name': self.regular_deposit_name,
-            'issue_date': self.issue_date.strftime('%Y-%m-%d'),
+            'issue_date': self.issue_date.strftime(DATE_TIME_FORMAT),
             'return_cycle': self.return_cycle,
             'return_rate': self.return_rate
         }
@@ -73,7 +75,7 @@ class FundPriceRecord(models.Model):
     def to_dict(self):
         dictionary = {
             'fund_id': self.fund.fund_id,
-            'record_date': self.record_date.strftime('%Y-%m-%d'),
+            'record_date': self.record_date.strftime(DATE_TIME_FORMAT),
             'price': self.price
         }
         return dictionary
@@ -87,7 +89,7 @@ class StockPriceRecord(models.Model):
     def to_dict(self):
         dictionary = {
             'stock_id': self.stock.stock_id,
-            'record_date': self.record_date.strftime('%Y-%m-%d'),
+            'record_date': self.record_date.strftime(DATE_TIME_FORMAT),
             'price': self.price
         }
         return dictionary
