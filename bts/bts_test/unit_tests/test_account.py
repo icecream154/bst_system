@@ -5,13 +5,11 @@ from django.test import TestCase
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 django.setup()
 
-from bts.bts_test.rpc_test import sys_register, sys_login
+from bts.bts_test.rpc_test import sys_register, sys_login, sys_logout
 
-from bts.services.system import account
+from bts.services.system import token
 
-from django.http import HttpRequest, HttpResponse
-
-import json
+import time
 
 from django.test import Client
 
@@ -76,6 +74,26 @@ class TestAccount(TestCase):
         self.assertEqual("wrong password", response_dict)
 
     def test_bank_teller_logout(self):
+        sys_login("登录测试", "imbus123")
         status_code, response_dict = sys_login("登录测试", "imbus123")
-        token=response_dict['token']
 
+        # 正常登出测试
+        user_token = response_dict['token']
+        status_code, response_dict = sys_logout(user_token)
+        self.assertEqual(200, status_code)
+        self.assertEqual("logout success", response_dict["msg"])
+
+        status_code, response_dict = sys_login("登录测试", "imbus123")
+
+        # token过期测试
+        user_token = response_dict['token']
+        bank_teller = token.token_dict[user_token][0]
+        token.token_dict[user_token] = (bank_teller, time.time() - 1)
+        status_code, response_dict = sys_logout(user_token)
+        self.assertEqual(403, status_code)
+        self.assertEqual("invalid token", response_dict)
+
+        # 无效token测试
+        status_code, response_dict = sys_logout("wrong token")
+        self.assertEqual(403, status_code)
+        self.assertEqual("invalid token", response_dict)

@@ -18,9 +18,11 @@ def do_request(request_type: str, url: str, params: dict = None, headers: dict =
     # return response.status_code, response_dict
 
     client = Client()
+    if headers is None:
+        headers = {}
     if request_type == "POST":
         response = client.post(BST_BASE_URL + url,
-                               data=data)
+                               data=data, **headers)
     else:
         response = client.get(BST_BASE_URL + url,
                               data=data)

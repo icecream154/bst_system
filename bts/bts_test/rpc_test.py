@@ -1,5 +1,7 @@
 from bts.bts_test.rpc_utils import do_get_request, do_post_request
 
+from bts.services.system.token import TOKEN_HEADER_KEY
+
 
 def sys_register(account: str, password: str, name: str, phone: str = None):
     if phone is not None:
@@ -19,7 +21,7 @@ def sys_login(username: str, password: str = None):
 
 
 def sys_logout(token: str):
-    return do_post_request('/system/logout', headers={'authorization': token})
+    return do_post_request('/system/logout', headers={TOKEN_HEADER_KEY: token})
 
 
 # 添加客户
