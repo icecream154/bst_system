@@ -162,7 +162,7 @@ if __name__ == '__main__':
     show_info(status_code, response_dict)
 
     # 发行定期理财产品
-    status_code, response_dict = issue_regular_deposit(bt_token, '定期理财一号', '2021-3-9', '9', 0.07)
+    status_code, response_dict = issue_regular_deposit(bt_token, '定期理财一号', '2021-3-9', 9, 0.07)
     show_info(status_code, response_dict)
     new_regular_deposit_id = response_dict['regular_deposit_id']
 
