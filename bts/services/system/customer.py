@@ -2,6 +2,7 @@ import json
 
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 
+from bts.models.constants import EM_INVALID_OR_MISSING_PARAMETERS, EM_NO_SUCH_CUSTOMER
 from bts.models.customer import Customer
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 from bts.utils.request_processor import fetch_parameter_dict
@@ -20,7 +21,7 @@ def add_customer(request):
         id_number = parameter_dict['id_number']
         deposit = float(parameter_dict['deposit'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     try:
         Customer.objects.get(id_number=id_number)
@@ -42,6 +43,6 @@ def query_customer_by_id_number(request):
         customer = Customer.objects.get(id_number=request.GET['id_number'])
         return HttpResponse(json.dumps(customer.to_dict()))
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
     except Customer.DoesNotExist:
-        raise Http404('No such customer')
+        raise Http404(EM_NO_SUCH_CUSTOMER)

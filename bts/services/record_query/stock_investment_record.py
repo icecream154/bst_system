@@ -2,7 +2,7 @@ import json
 
 from django.http import HttpResponse, HttpResponseBadRequest
 
-from bts.models.constants import INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE
+from bts.models.constants import EM_INVALID_OR_MISSING_PARAMETERS
 from bts.models.customer import Customer
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 
@@ -15,7 +15,7 @@ def query_stock_investment_record_by_customer_id(request):
         customer_id = int(request.GET['customer_id'])
         customer = Customer.objects.get(customer_id=customer_id)
     except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
-        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     response_data = []
     for stock_investment_record in customer.stockinvestmentrecord_set.all():

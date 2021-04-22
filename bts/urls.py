@@ -82,7 +82,7 @@ urlpatterns = [
     # 发行定期理财产品
     path('market/issue_regular_deposit', investment_market.issue_regular_deposit, name='issue_regular_deposit'),
 
-    # 流水模块
+    # --流水模块--
     # 查询存款记录
     path('record_query/deposit', deposit_record.query_deposits_by_customer_id, name='query_deposits_by_customer_id'),
     # 查询还款记录

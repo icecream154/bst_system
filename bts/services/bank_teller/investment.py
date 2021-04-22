@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from django.db.models import Sum
 from django.http import HttpResponse, HttpResponseBadRequest, Http404, HttpResponseForbidden
 
-from bts.models.constants import DATE_TIME_FORMAT, INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE
+from bts.models.constants import DATE_TIME_FORMAT, EM_INVALID_OR_MISSING_PARAMETERS, EM_CANNOT_PAY_FINE, \
+    EM_DEPOSIT_NOT_ENOUGH, EM_NO_SUCH_CUSTOMER
 from bts.models.customer import Customer
 from bts.models.investment import RegularDepositInvestment, FundInvestment, StockInvestment, StockInvestmentRecord
 from bts.models.loan import LoanRecord
@@ -53,12 +54,12 @@ def get_customer_credit(request):
     try:
         customer_id = int(request.GET['customer_id'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
     except Customer.DoesNotExist:
-        raise Http404('No such customer')
+        raise Http404(EM_NO_SUCH_CUSTOMER)
 
     return HttpResponse(json.dumps(_get_customer_credit(customer)))
 
@@ -87,20 +88,20 @@ def buy_regular_deposit(request):
         purchase_amount = float(parameter_dict['purchase_amount'])
         purchase_date = datetime.strptime(parameter_dict['purchase_date'], DATE_TIME_FORMAT).date()
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
         regular_deposit = RegularDeposit.objects.get(regular_deposit_id=regular_deposit_id)
     except Customer.DoesNotExist:
-        raise Http404('No such customer')
+        raise Http404(EM_NO_SUCH_CUSTOMER)
     except RegularDeposit.DoesNotExist:
         raise Http404('No such regular deposit')
 
     if not _fine_repay(customer):
-        return HttpResponseForbidden('cannot pay fine')
+        return HttpResponseForbidden(EM_CANNOT_PAY_FINE)
     if customer.deposit < purchase_amount:
-        return HttpResponseForbidden('deposit not enough for purchase amount')
+        return HttpResponseForbidden(EM_DEPOSIT_NOT_ENOUGH)
 
     customer.deposit -= purchase_amount
     customer.save()
@@ -124,20 +125,20 @@ def buy_fund(request):
         purchase_date = datetime.strptime(parameter_dict['purchase_date'], DATE_TIME_FORMAT).date()
         return_cycle = int(parameter_dict['return_cycle'])
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
         fund = Fund.objects.get(fund_id=fund_id)
     except Customer.DoesNotExist:
-        raise Http404('No such customer')
+        raise Http404(EM_NO_SUCH_CUSTOMER)
     except Fund.DoesNotExist:
         raise Http404('No such fund')
 
     if not _fine_repay(customer):
-        return HttpResponseForbidden('cannot pay fine')
+        return HttpResponseForbidden(EM_CANNOT_PAY_FINE)
     if customer.deposit < purchase_amount:
-        return HttpResponseForbidden('deposit not enough for purchase amount')
+        return HttpResponseForbidden(EM_DEPOSIT_NOT_ENOUGH)
     if _get_customer_credit(customer)['credit_level'] > Credit.CREDIT_SECONDARY_ACCOUNT:
         return HttpResponseForbidden('credit level forbidden')
 
@@ -169,24 +170,24 @@ def buy_stock(request):
         new_position_share = int(parameter_dict['new_position_share'])  # 新买入的股数
         purchase_date = datetime.strptime(parameter_dict['purchase_date'], DATE_TIME_FORMAT).date()
     except (KeyError, ValueError, TypeError):
-        return HttpResponseBadRequest(INVALID_OR_MISSING_PARAMETERS_ERR_MESSAGE)
+        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     try:
         customer = Customer.objects.get(customer_id=customer_id)
         stock = Stock.objects.get(stock_id=stock_id)
     except Customer.DoesNotExist:
-        raise Http404('No such customer')
+        raise Http404(EM_NO_SUCH_CUSTOMER)
     except Stock.DoesNotExist:
         raise Http404('No such stock')
 
     if not _fine_repay(customer):
-        return HttpResponseForbidden('cannot pay fine')
+        return HttpResponseForbidden(EM_CANNOT_PAY_FINE)
     stock_price = get_stock_price_from_market(stock, purchase_date)
     if not stock_price:
         return HttpResponseForbidden('invalid purchase')
     purchase_amount = stock_price * new_position_share
     if customer.deposit < purchase_amount:
-        return HttpResponseForbidden('deposit not enough for purchase amount')
+        return HttpResponseForbidden(EM_DEPOSIT_NOT_ENOUGH)
     if _get_customer_credit(customer)['credit_level'] > Credit.CREDIT_PRIMARY_ACCOUNT:
         return HttpResponseForbidden('credit level forbidden')
 
