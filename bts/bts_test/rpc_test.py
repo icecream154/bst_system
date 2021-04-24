@@ -68,13 +68,13 @@ def customer_loan(token: str, customer_id: int, payment: float, repay_cycle: int
 
 # 查询指定ID的贷款记录
 def loan_query_record_by_id(token: str, loan_record_id: int):
-    return do_get_request('/loan/query_by_record_id', headers={'authorization': token},
+    return do_get_request('/loan/query_by_record_id', headers={TOKEN_HEADER_KEY: token},
                           params={'loan_record_id': loan_record_id})
 
 
 # 查询客户的所有贷款
 def loan_query_record_by_customer_id(token: str, customer_id: int):
-    return do_get_request('/loan/query_by_customer_id', headers={'authorization': token},
+    return do_get_request('/loan/query_by_customer_id', headers={TOKEN_HEADER_KEY: token},
                           params={'customer_id': customer_id})
 
 
