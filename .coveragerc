@@ -1,0 +1,11 @@
+[run]
+branch = True
+source = .
+omit=
+    */bts_test/*
+    */migrations/*
+    mysite/*
+    */__init__.py
+
+[report]
+show_missing = True

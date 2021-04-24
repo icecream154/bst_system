@@ -25,7 +25,7 @@ def do_request(request_type: str, url: str, params: dict = None, headers: dict =
                                data=data, **headers)
     else:
         response = client.get(BST_BASE_URL + url,
-                              data=data)
+                              data=params, **headers)
     response_dict = response.content.decode('utf-8')
     if response.status_code == 200:
         response_dict = json.loads(response_dict)

@@ -35,15 +35,15 @@ def request_loan(request):
         # print(parameter_dict['repay_cycle'])
         created_time = datetime.strptime(parameter_dict['created_time'], DATE_TIME_FORMAT).date()
         # print(parameter_dict['created_time'])
-        customer = Customer.objects.get(customer_id=customer_id)
-    except (KeyError, ValueError, TypeError, Customer.DoesNotExist):
+
+    except (KeyError, ValueError, TypeError):
         return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     if payment <= 0:
         return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     try:
-        Customer.objects.get(customer_id=customer_id)
+        customer = Customer.objects.get(customer_id=customer_id)
     except Customer.DoesNotExist:
         raise Http404(EM_NO_SUCH_CUSTOMER)
 
@@ -123,14 +123,14 @@ def auto_repay_process(request):
                     customer.deposit -= loan_record.left_payment
                     loan_record.left_payment = 0
 
+            loan_record.save()
+            customer.save()
             if curr_repay > 0:
                 new_loan_repay = LoanRepay(loan_record=loan_record,
                                            left_payment_before=left_payment_before,
                                            left_fine_before=left_fine_before,
                                            repay=curr_repay, current_deposit=customer.deposit)
-            loan_record.save()
-            customer.save()
-            new_loan_repay.save()
+                new_loan_repay.save()
 
     response_data = {'msg': 'auto repay process success'}
     return HttpResponse(json.dumps(response_data))

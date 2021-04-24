@@ -5,11 +5,10 @@ from bts.services.system.token import TOKEN_HEADER_KEY
 
 def sys_register(account: str, password: str, name: str, phone: str = None):
     if phone is not None:
-        return do_post_request('/system/register', data={'account': account, 'password': password,
-                                                         'name': name, 'phone': phone})
+        return do_post_request('/system/register',
+                               data={'account': account, 'password': password, 'name': name, 'phone': phone})
     else:
-        return do_post_request('/system/register', data={'account': account, 'password': password,
-                                                         'name': name})
+        return do_post_request('/system/register', data={'account': account, 'password': password, 'name': name})
 
 
 def sys_login(username: str, password: str = None):
@@ -25,29 +24,46 @@ def sys_logout(token: str):
 
 
 # 添加客户
-def add_customer(token: str, name: str, phone: str, id_number: str, deposit: float):
-    return do_post_request('/customer/add', headers={'authorization': token},
-                           data={'name': name, 'phone': phone, 'id_number': id_number, 'deposit': deposit})
+def add_customer(token: str, name: str, phone: str, id_number: str, deposit: float = None):
+    if deposit is not None:
+        return do_post_request('/customer/add', headers={TOKEN_HEADER_KEY: token},
+                               data={'name': name, 'phone': phone, 'id_number': id_number, 'deposit': deposit})
+    else:
+        return do_post_request('/customer/add', headers={TOKEN_HEADER_KEY: token},
+                               data={'name': name, 'phone': phone, 'id_number': id_number})
 
 
 # 通过身份证查询客户
-def query_customer_by_id_number(token: str, id_number: str):
-    return do_get_request('/customer/query_by_id_number', headers={'authorization': token},
-                          params={'id_number': id_number})
+def query_customer_by_id_number(token: str, id_number: str = None):
+    if id_number is not None:
+        return do_get_request('/customer/query_by_id_number', headers={TOKEN_HEADER_KEY: token},
+                              params={'id_number': id_number})
+    else:
+        return do_get_request('/customer/query_by_id_number', headers={TOKEN_HEADER_KEY: token})
 
 
 # 客户存款
-def customer_deposit(token: str, customer_id: int, new_deposit: float):
-    return do_post_request('/deposit', headers={'authorization': token}, data={'customer_id': customer_id,
-                                                                               'new_deposit': new_deposit})
+def customer_deposit(token: str, customer_id: int, new_deposit: float = None):
+    if new_deposit is not None:
+        return do_post_request('/deposit', headers={TOKEN_HEADER_KEY: token}, data={'customer_id': customer_id,
+                                                                                    'new_deposit': new_deposit})
+    else:
+        return do_post_request('/deposit', headers={TOKEN_HEADER_KEY: token}, data={'customer_id': customer_id})
 
 
 # 客户贷款
-def customer_loan(token: str, customer_id: int, payment: float, repay_cycle: int, created_time: str):
-    return do_post_request('/loan/request_loan', headers={'authorization': token}, data={'customer_id': customer_id,
-                                                                                         'payment': payment,
-                                                                                         'repay_cycle': repay_cycle,
-                                                                                         'created_time': created_time})
+def customer_loan(token: str, customer_id: int, payment: float, repay_cycle: int, created_time: str = None):
+    if created_time is not None:
+        return do_post_request('/loan/request_loan', headers={TOKEN_HEADER_KEY: token},
+                               data={'customer_id': customer_id,
+                                     'payment': payment,
+                                     'repay_cycle': repay_cycle,
+                                     'created_time': created_time})
+    else:
+        return do_post_request('/loan/request_loan', headers={TOKEN_HEADER_KEY: token},
+                               data={'customer_id': customer_id,
+                                     'payment': payment,
+                                     'repay_cycle': repay_cycle})
 
 
 # 查询指定ID的贷款记录
@@ -63,14 +79,18 @@ def loan_query_record_by_customer_id(token: str, customer_id: int):
 
 
 # 客户进行贷款还款
-def customer_loan_repay(token: str, loan_record_id: int, repay: float):
-    return do_post_request('/loan/repay', headers={'authorization': token}, data={'loan_record_id': loan_record_id,
-                                                                                  'repay': repay})
+def customer_loan_repay(token: str, loan_record_id: int, repay: float = None):
+    if repay is not None:
+        return do_post_request('/loan/repay', headers={TOKEN_HEADER_KEY: token}, data={'loan_record_id': loan_record_id,
+                                                                                       'repay': repay})
+    else:
+        return do_post_request('/loan/repay', headers={TOKEN_HEADER_KEY: token},
+                               data={'loan_record_id': loan_record_id})
 
 
 # 发起日终处理
-def loan_auto_repay():
-    pass
+def loan_auto_repay(token: str):
+    return do_post_request('/loan/auto_repay', headers={TOKEN_HEADER_KEY: token})
 
 
 # 发行定期理财产品

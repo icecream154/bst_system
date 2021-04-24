@@ -97,3 +97,5 @@ class TestAccount(TestCase):
         status_code, response_dict = sys_logout("wrong token")
         self.assertEqual(403, status_code)
         self.assertEqual("invalid token", response_dict)
+
+        token.expire_token("wrong token")
