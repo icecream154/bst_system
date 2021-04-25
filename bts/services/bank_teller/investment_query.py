@@ -23,15 +23,16 @@ def query_customer_fund_invest(request):
         return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     fund_invest_list = _query_customer_product_invest(customer, FundInvestment)
+    fund_invest_dict_list = []
     for fund_invest in fund_invest_list:
-        fund = Fund.objects.get(fund_id=fund_invest['fund_id'])
-        curr_fund_price = get_fund_price_from_market(fund=fund, search_date=query_date)
-        fund_invest['current_profit'] = None
+        curr_fund_price = get_fund_price_from_market(fund=fund_invest.fund, search_date=query_date)
+        fund_invest_dict = fund_invest.to_dict()
+        fund_invest_dict['current_profit'] = None
         if curr_fund_price and query_date >= fund_invest.purchase_date:
             fund_invest['current_profit'] = fund_invest['position_share'] * curr_fund_price \
                                             - fund_invest['purchase_amount']
-
-    return HttpResponse(json.dumps(fund_invest_list))
+        fund_invest_dict_list.append(fund_invest_dict)
+    return HttpResponse(json.dumps(fund_invest_dict_list))
 
 
 def query_customer_stock_invest(request):
@@ -45,16 +46,18 @@ def query_customer_stock_invest(request):
         return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     stock_invest_list = _query_customer_product_invest(customer, StockInvestment)
+    stock_invest_dict_list = []
     for stock_invest in stock_invest_list:
-        stock = Stock.objects.get(stock_id=stock_invest['stock_id'])
-        curr_stock_price = get_stock_price_from_market(stock=stock, search_date=query_date)
-        stock_invest['current_profit'] = None
+        curr_stock_price = get_stock_price_from_market(stock=stock_invest.stock, search_date=query_date)
+        stock_invest_dict = stock_invest.to_dict()
+        stock_invest_dict['current_profit'] = None
         total_position_share, cumulative_purchase_amount = \
-            _get_position_share_and_cumulative_purchase_amount(customer, stock, query_date)
+            _get_position_share_and_cumulative_purchase_amount(customer, stock_invest.stock, query_date)
         if curr_stock_price and query_date >= stock_invest.purchase_date:
             stock_invest['current_profit'] = total_position_share * curr_stock_price \
                                              - cumulative_purchase_amount
-    return HttpResponse(json.dumps(stock_invest_list))
+        stock_invest_dict_list.append(stock_invest_dict)
+    return HttpResponse(json.dumps(stock_invest_dict_list))
 
 
 def _get_position_share_and_cumulative_purchase_amount(customer: Customer, stock: Stock, query_date: date):
@@ -77,17 +80,14 @@ def query_customer_regular_deposit_invest(request):
         return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     regular_deposit_invest_list = _query_customer_product_invest(customer, RegularDepositInvestment)
+    regular_deposit_invest_dict_list = []
     for regular_deposit_invest in regular_deposit_invest_list:
-        return_rate = RegularDeposit.objects.get(regular_deposit_id=regular_deposit_invest['regular_deposit_id']) \
-            .return_rate
-        regular_deposit_invest['expecting_profit'] = return_rate * regular_deposit_invest['purchase_amount']
-    return HttpResponse(json.dumps(regular_deposit_invest_list))
+        return_rate = regular_deposit_invest.return_rate
+        regular_deposit_invest_dict = regular_deposit_invest.to_dict()
+        regular_deposit_invest_dict['expecting_profit'] = return_rate * regular_deposit_invest.purchase_amount
+        regular_deposit_invest_dict_list.append(regular_deposit_invest_dict)
+    return HttpResponse(json.dumps(regular_deposit_invest_dict_list))
 
 
 def _query_customer_product_invest(customer: Customer, product_invest_cls):
-    product_invest_obj_list = list(product_invest_cls.objects.filter(customer=customer))
-    # TODO: 不用转dict
-    product_invest_list = []
-    for product_invest in product_invest_obj_list:
-        product_invest_list.append(product_invest.to_dict())
-    return product_invest_list
+    return list(product_invest_cls.objects.filter(customer=customer))
