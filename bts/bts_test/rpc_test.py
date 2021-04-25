@@ -95,24 +95,77 @@ def loan_auto_repay(token: str):
 
 # 发行定期理财产品
 def issue_regular_deposit(token: str, regular_deposit_name: str,
-                          issue_date: str, return_cycle: int, return_rate: float):
-    return do_post_request('/market/issue_regular_deposit', headers={'authorization': token},
-                           data={'regular_deposit_name': regular_deposit_name, 'issue_date': issue_date,
-                                 'return_cycle': return_cycle, 'return_rate': return_rate})
+                          issue_date: str, return_cycle: int, return_rate: float = None):
+    if return_rate is not None:
+        return do_post_request('/market/issue_regular_deposit', headers={TOKEN_HEADER_KEY: token},
+                               data={'regular_deposit_name': regular_deposit_name, 'issue_date': issue_date,
+                                     'return_cycle': return_cycle, 'return_rate': return_rate})
+    else:
+        return do_post_request('/market/issue_regular_deposit', headers={TOKEN_HEADER_KEY: token},
+                               data={'regular_deposit_name': regular_deposit_name, 'issue_date': issue_date,
+                                     'return_cycle': return_cycle})
 
 
 # 发行基金
-def issue_fund(token: str, fund_name: str, issue_date: str, issue_price: float):
-    return do_post_request('/market/issue_fund', headers={'authorization': token},
-                           data={'fund_name': fund_name, 'issue_date': issue_date,
-                                 'issue_price': issue_price})
+def issue_fund(token: str, fund_name: str, issue_date: str, issue_price: float = None):
+    if issue_price is not None:
+        return do_post_request('/market/issue_fund', headers={TOKEN_HEADER_KEY: token},
+                               data={'fund_name': fund_name, 'issue_date': issue_date,
+                                     'issue_price': issue_price})
+    else:
+        return do_post_request('/market/issue_fund', headers={TOKEN_HEADER_KEY: token},
+                               data={'fund_name': fund_name, 'issue_date': issue_date})
 
 
 # 发行股票
-def issue_stock(token: str, stock_name: str, issue_date: str, issue_price: float):
-    return do_post_request('/market/issue_stock', headers={'authorization': token},
-                           data={'stock_name': stock_name, 'issue_date': issue_date,
-                                 'issue_price': issue_price})
+def issue_stock(token: str, stock_name: str, issue_date: str, issue_price: float = None):
+    if issue_price is not None:
+        return do_post_request('/market/issue_stock', headers={TOKEN_HEADER_KEY: token},
+                               data={'stock_name': stock_name, 'issue_date': issue_date,
+                                     'issue_price': issue_price})
+    else:
+        return do_post_request('/market/issue_stock', headers={TOKEN_HEADER_KEY: token},
+                               data={'stock_name': stock_name, 'issue_date': issue_date})
+
+
+# 获取基金价格
+def get_fund_price(fund_id: int, search_date: str = None):
+    if search_date is not None:
+        return do_get_request('/market/get_fund_price', params={'fund_id': fund_id, 'search_date': search_date})
+    else:
+        return do_get_request('/market/get_fund_price', params={'fund_id': fund_id})
+
+
+# 获取股票价格
+def get_stock_price(fund_id: int, search_date: str = None):
+    if search_date is not None:
+        return do_get_request('/market/get_stock_price', params={'stock_id': fund_id, 'search_date': search_date})
+    else:
+        return do_get_request('/market/get_stock_price', params={'stock_id': fund_id})
+
+
+# 查询基金
+def query_funds(product_id: int = None):
+    if product_id is not None:
+        return do_get_request('/market/query_funds', params={'product_id': product_id})
+    else:
+        return do_get_request('/market/query_funds')
+
+
+# 查询股票
+def query_stocks(product_id: int = None):
+    if product_id is not None:
+        return do_get_request('/market/query_stocks', params={'product_id': product_id})
+    else:
+        return do_get_request('/market/query_stocks')
+
+
+# 查询定期理财
+def query_regular_deposits(product_id: int = None):
+    if product_id is not None:
+        return do_get_request('/market/query_regular_deposits', params={'product_id': product_id})
+    else:
+        return do_get_request('/market/query_regular_deposits')
 
 
 # 购买定期理财产品
@@ -125,17 +178,22 @@ def buy_regular_deposit(token: str, customer_id: int, regular_deposit_id: int,
 
 # 购买基金产品
 def buy_fund(token: str, customer_id: int, fund_id: int,
-             purchase_amount: float, purchase_date: str, return_cycle: int):
-    return do_post_request('/investment/buy_fund', headers={'authorization': token},
-                           data={'customer_id': customer_id, 'fund_id': fund_id,
-                                 'purchase_amount': purchase_amount, 'purchase_date': purchase_date,
-                                 'return_cycle': return_cycle})
+             purchase_amount: float, purchase_date: str, return_cycle: int = None):
+    if return_cycle is not None:
+        return do_post_request('/investment/buy_fund', headers={TOKEN_HEADER_KEY: token},
+                               data={'customer_id': customer_id, 'fund_id': fund_id,
+                                     'purchase_amount': purchase_amount, 'purchase_date': purchase_date,
+                                     'return_cycle': return_cycle})
+    else:
+        return do_post_request('/investment/buy_fund', headers={TOKEN_HEADER_KEY: token},
+                               data={'customer_id': customer_id, 'fund_id': fund_id,
+                                     'purchase_amount': purchase_amount, 'purchase_date': purchase_date})
 
 
 # 购买股票产品
 def buy_stock(token: str, customer_id: int, stock_id: int,
               new_position_share: float, purchase_date: str):
-    return do_post_request('/investment/buy_stock', headers={'authorization': token},
+    return do_post_request('/investment/buy_stock', headers={TOKEN_HEADER_KEY: token},
                            data={'customer_id': customer_id, 'stock_id': stock_id,
                                  'new_position_share': new_position_share, 'purchase_date': purchase_date})
 

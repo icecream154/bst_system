@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 
 from django.http import HttpResponseBadRequest, HttpResponse, Http404
 
-from bts.models.constants import DATE_TIME_FORMAT, EM_INVALID_OR_MISSING_PARAMETERS
+from bts.models.constants import DATE_TIME_FORMAT, EM_INVALID_OR_MISSING_PARAMETERS, EM_PRODUCT_NAME_USED
 from bts.models.products import FundPriceRecord, StockPriceRecord, Fund, Stock, RegularDeposit
 from bts.services.system.token import fetch_bank_teller_by_token, TOKEN_HEADER_KEY
 from bts.utils.request_processor import fetch_parameter_dict
@@ -89,9 +89,6 @@ def get_fund_price(request):
         fund = Fund.objects.get(fund_id=fund_id)
     except (KeyError, ValueError, TypeError, Fund.DoesNotExist):
         return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
-    except Exception as ex:
-        print(ex)
-        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     response_data = {'price': get_fund_price_from_market(fund, search_date)}
     if not response_data['price']:
@@ -105,9 +102,6 @@ def get_stock_price(request):
         search_date = datetime.strptime(request.GET['search_date'], DATE_TIME_FORMAT).date()
         stock = Stock.objects.get(stock_id=stock_id)
     except (KeyError, ValueError, TypeError, Stock.DoesNotExist):
-        return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
-    except Exception as ex:
-        print(ex)
         return HttpResponseBadRequest(EM_INVALID_OR_MISSING_PARAMETERS)
 
     response_data = {'price': get_stock_price_from_market(stock, search_date)}
