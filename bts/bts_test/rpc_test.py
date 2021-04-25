@@ -170,10 +170,15 @@ def query_regular_deposits(product_id: int = None):
 
 # 购买定期理财产品
 def buy_regular_deposit(token: str, customer_id: int, regular_deposit_id: int,
-                        purchase_amount: float, purchase_date: str):
-    return do_post_request('/investment/buy_regular_deposit', headers={'authorization': token},
-                           data={'customer_id': customer_id, 'regular_deposit_id': regular_deposit_id,
-                                 'purchase_amount': purchase_amount, 'purchase_date': purchase_date})
+                        purchase_amount: float, purchase_date: str = None):
+    if purchase_date is not None:
+        return do_post_request('/investment/buy_regular_deposit', headers={TOKEN_HEADER_KEY: token},
+                               data={'customer_id': customer_id, 'regular_deposit_id': regular_deposit_id,
+                                     'purchase_amount': purchase_amount, 'purchase_date': purchase_date})
+    else:
+        return do_post_request('/investment/buy_regular_deposit', headers={TOKEN_HEADER_KEY: token},
+                               data={'customer_id': customer_id, 'regular_deposit_id': regular_deposit_id,
+                                     'purchase_amount': purchase_amount})
 
 
 # 购买基金产品
@@ -192,10 +197,34 @@ def buy_fund(token: str, customer_id: int, fund_id: int,
 
 # 购买股票产品
 def buy_stock(token: str, customer_id: int, stock_id: int,
-              new_position_share: float, purchase_date: str):
-    return do_post_request('/investment/buy_stock', headers={TOKEN_HEADER_KEY: token},
-                           data={'customer_id': customer_id, 'stock_id': stock_id,
-                                 'new_position_share': new_position_share, 'purchase_date': purchase_date})
+              new_position_share: float, purchase_date: str = None):
+    if purchase_date is not None:
+        return do_post_request('/investment/buy_stock', headers={TOKEN_HEADER_KEY: token},
+                               data={'customer_id': customer_id, 'stock_id': stock_id,
+                                     'new_position_share': new_position_share, 'purchase_date': purchase_date})
+    else:
+        return do_post_request('/investment/buy_stock', headers={TOKEN_HEADER_KEY: token},
+                               data={'customer_id': customer_id, 'stock_id': stock_id,
+                                     'new_position_share': new_position_share})
+
+
+# 查询用户信用等级
+def get_customer_credit(token: str, customer_id: int = None):
+    if customer_id is not None:
+        return do_get_request("/investment/get_customer_credit", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id})
+    else:
+        return do_get_request("/investment/get_customer_credit", headers={TOKEN_HEADER_KEY: token})
+
+
+# 查询用户基金投资情况
+def query_customer_fund_invest(token: str, customer_id: int, query_date: str = None):
+    if query_date is not None:
+        return do_get_request("/investment/query_customer_fund_invest", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id, "query_date": query_date})
+    else:
+        return do_get_request("/investment/query_customer_fund_invest", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id})
 
 
 def show_info(status_code: int, response_dict: dict):
