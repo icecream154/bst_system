@@ -24,7 +24,8 @@ def query_customer_fund_invest(request):
     for fund_invest in fund_invest_list:
         fund = Fund.objects.get(fund_id=fund_invest['fund_id'])
         curr_fund_price = get_fund_price_from_market(fund=fund, search_date=query_date)
-        if curr_fund_price:
+        fund_invest['current_profit'] = None
+        if curr_fund_price and query_date >= fund_invest.purchase_date:
             fund_invest['current_profit'] = fund_invest['position_share'] * curr_fund_price \
                                             - fund_invest['purchase_amount']
 
@@ -45,7 +46,8 @@ def query_customer_stock_invest(request):
     for stock_invest in stock_invest_list:
         stock = Stock.objects.get(stock_id=stock_invest['stock_id'])
         curr_stock_price = get_stock_price_from_market(stock=stock, search_date=query_date)
-        if curr_stock_price:
+        stock_invest['current_profit'] = None
+        if curr_stock_price and query_date >= stock_invest.purchase_date:
             stock_invest['current_profit'] = stock_invest['position_share'] * curr_stock_price \
                                              - stock_invest['cumulative_purchase_amount']
     return HttpResponse(json.dumps(stock_invest_list))
