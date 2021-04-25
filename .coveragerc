@@ -6,6 +6,8 @@ omit=
     */migrations/*
     mysite/*
     */__init__.py
+    */manage.py
+    */utils/*
 
 [report]
 show_missing = True

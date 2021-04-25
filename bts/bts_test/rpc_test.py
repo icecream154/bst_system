@@ -227,8 +227,54 @@ def query_customer_fund_invest(token: str, customer_id: int, query_date: str = N
                               params={"customer_id": customer_id})
 
 
-def show_info(status_code: int, response_dict: dict):
-    print('status_code[%d] and response: [%s]' % (status_code, response_dict))
+# 查询用户股票投资情况
+def query_customer_stock_invest(token: str, customer_id: int, query_date: str = None):
+    if query_date is not None:
+        return do_get_request("/investment/query_customer_stock_invest", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id, "query_date": query_date})
+    else:
+        return do_get_request("/investment/query_customer_stock_invest", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id})
+
+
+# 查询用户定期理财投资情况
+def query_customer_regular_deposit_invest(token: str, customer_id: int = None):
+    if customer_id is not None:
+        return do_get_request("/investment/query_customer_regular_deposit_invest", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id})
+    else:
+        return do_get_request("/investment/query_customer_regular_deposit_invest", headers={TOKEN_HEADER_KEY: token})
+
+
+# 查询用户存款记录
+def query_deposits_by_customer_id(token: str, customer_id: int = None):
+    if customer_id is not None:
+        return do_get_request("/record_query/deposit", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id})
+    else:
+        return do_get_request("/record_query/deposit", headers={TOKEN_HEADER_KEY: token})
+
+
+# 查询用户还款记录
+def query_repays_by_customer_id(token: str, customer_id: int = None):
+    if customer_id is not None:
+        return do_get_request("/record_query/repay", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id})
+    else:
+        return do_get_request("/record_query/repay", headers={TOKEN_HEADER_KEY: token})
+
+
+# 查询用户股票投资记录
+def query_stock_investment_by_customer_id(token: str, customer_id: int = None):
+    if customer_id is not None:
+        return do_get_request("/record_query/stock_investment", headers={TOKEN_HEADER_KEY: token},
+                              params={"customer_id": customer_id})
+    else:
+        return do_get_request("/record_query/stock_investment", headers={TOKEN_HEADER_KEY: token})
+
+
+def show_info(param_status_code: int, param_response_dict: dict):
+    print('status_code[%d] and response: [%s]' % (param_status_code, param_response_dict))
 
 
 # 数据库初始化脚本

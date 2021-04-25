@@ -82,7 +82,7 @@ def query_customer_regular_deposit_invest(request):
     regular_deposit_invest_list = _query_customer_product_invest(customer, RegularDepositInvestment)
     regular_deposit_invest_dict_list = []
     for regular_deposit_invest in regular_deposit_invest_list:
-        return_rate = regular_deposit_invest.return_rate
+        return_rate = regular_deposit_invest.regular_deposit.return_rate
         regular_deposit_invest_dict = regular_deposit_invest.to_dict()
         regular_deposit_invest_dict['expecting_profit'] = return_rate * regular_deposit_invest.purchase_amount
         regular_deposit_invest_dict_list.append(regular_deposit_invest_dict)

@@ -2,15 +2,14 @@ import os, django
 
 from django.test import TestCase
 
-from bts.models.loan import LoanRecord
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 django.setup()
 
-from bts.bts_test.rpc_test import sys_register, sys_login, add_customer, loan_auto_repay, issue_fund, issue_stock, \
-    issue_regular_deposit, buy_fund, buy_stock, buy_regular_deposit, query_customer_fund_invest
+from bts.bts_test.rpc_test import sys_register, sys_login, add_customer, issue_fund, issue_stock, \
+    issue_regular_deposit, buy_fund, buy_stock, buy_regular_deposit, query_customer_fund_invest, \
+    query_customer_stock_invest, query_customer_regular_deposit_invest
 
-from bts.models.constants import EM_INVALID_OR_MISSING_PARAMETERS, EM_DEPOSIT_NOT_ENOUGH, EM_CANNOT_PAY_FINE
+from bts.models.constants import EM_INVALID_OR_MISSING_PARAMETERS
 
 from django.test import Client
 
@@ -18,9 +17,9 @@ from django.test import Client
 class TestInvestmentQuery(TestCase):
     def setUp(self):
         self.client = Client()
-        sys_register("投资测试", "imbus123", "柜员", "13966667777")
+        sys_register("投资查询测试", "imbus123", "柜员", "13966667777")
 
-        status_code, response_dict = sys_login("投资测试", "imbus123")
+        status_code, response_dict = sys_login("投资查询测试", "imbus123")
         self.bank_teller_token = response_dict['token']
 
         status_code, response_dict = add_customer(self.bank_teller_token, "客户一", "13100006789", "330888855590001",
@@ -58,7 +57,44 @@ class TestInvestmentQuery(TestCase):
         self.assertEqual(400, status_code)
         self.assertEqual(EM_INVALID_OR_MISSING_PARAMETERS, response_dict)
 
+        # 查询时间错误测试
         status_code, response_dict = query_customer_fund_invest(self.bank_teller_token, self.customer_id, "2021-3-19")
         self.assertEqual(200, status_code)
-        print(response_dict)
-        # self.assertTrue(response_dict[0]["current_profit"])
+        self.assertFalse(response_dict[0]["current_profit"])
+
+    def test_query_customer_stock_invest(self):
+        # 正确查询股票投资情况测试
+        status_code, response_dict = query_customer_stock_invest(self.bank_teller_token, self.customer_id, "2021-3-22")
+        self.assertEqual(200, status_code)
+        self.assertTrue(response_dict[0]["current_profit"])
+
+        # 无柜员权限测试
+        status_code, response_dict = query_customer_stock_invest('wrong token', self.customer_id, "2021-3-22")
+        self.assertEqual(401, status_code)
+        self.assertEqual("Unauthorized", response_dict)
+
+        # 参数缺失测试
+        status_code, response_dict = query_customer_stock_invest(self.bank_teller_token, self.customer_id)
+        self.assertEqual(400, status_code)
+        self.assertEqual(EM_INVALID_OR_MISSING_PARAMETERS, response_dict)
+
+        # 查询时间错误测试
+        status_code, response_dict = query_customer_stock_invest(self.bank_teller_token, self.customer_id, "2021-3-19")
+        self.assertEqual(200, status_code)
+        self.assertFalse(response_dict[0]["current_profit"])
+
+    def test_query_customer_regular_deposit_invest(self):
+        # 正确查询股票投资情况测试
+        status_code, response_dict = query_customer_regular_deposit_invest(self.bank_teller_token, self.customer_id)
+        self.assertEqual(200, status_code)
+        self.assertTrue(response_dict[0]["expecting_profit"])
+
+        # 无柜员权限测试
+        status_code, response_dict = query_customer_regular_deposit_invest('wrong token', self.customer_id)
+        self.assertEqual(401, status_code)
+        self.assertEqual("Unauthorized", response_dict)
+
+        # 参数缺失测试
+        status_code, response_dict = query_customer_regular_deposit_invest(self.bank_teller_token)
+        self.assertEqual(400, status_code)
+        self.assertEqual(EM_INVALID_OR_MISSING_PARAMETERS, response_dict)

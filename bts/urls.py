@@ -1,6 +1,5 @@
 from django.urls import path
 
-from . import views
 from .services.system import account, customer
 from .services.bank_teller import deposit, loan_query
 from .services.bank_teller import loan
@@ -9,7 +8,6 @@ from .services.market import investment_market
 from .services.record_query import deposit_record, repay_record, stock_investment_record
 
 urlpatterns = [
-    path('', views.index, name='index'),
     # --系统模块--
     # 柜员注册
     path('system/register', account.bank_teller_register, name='register'),

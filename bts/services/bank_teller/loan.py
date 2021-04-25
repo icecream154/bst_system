@@ -56,19 +56,23 @@ def request_loan(request):
     return HttpResponse(json.dumps(response_data))
 
 
-def _loan_repay(loan_record: LoanRecord, repay: float):
+def _loan_repay(loan_record: LoanRecord, repay: float, is_from_deposit: bool = True):
     if repay > loan_record.left_fine + loan_record.left_payment or repay <= 0:
         return False
+    left_payment_before = loan_record.left_payment
+    left_fine_before = loan_record.left_fine
     if repay > loan_record.left_fine:
         loan_record.left_payment -= repay - loan_record.left_fine
         loan_record.left_fine = 0
     else:
         loan_record.left_fine -= repay
 
-    loan_record.customer.deposit -= repay
+    if is_from_deposit:
+        loan_record.customer.deposit -= repay
+
     new_loan_repay = LoanRepay(loan_record=loan_record,
-                               left_payment_before=loan_record.left_payment,
-                               left_fine_before=loan_record.left_fine,
+                               left_payment_before=left_payment_before,
+                               left_fine_before=left_fine_before,
                                repay=repay, current_deposit=loan_record.customer.deposit)
     loan_record.customer.save()
     loan_record.save()
@@ -96,7 +100,7 @@ def loan_repay(request):
         raise Http404('No such loan record')
 
     _calculate_fine(loan_record)
-    if _loan_repay(loan_record, repay):
+    if _loan_repay(loan_record, repay, False):
         response_data = {'msg': 'loan repay success'}
         return HttpResponse(json.dumps(response_data))
     return HttpResponseBadRequest('too much repay')

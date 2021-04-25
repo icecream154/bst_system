@@ -27,6 +27,9 @@ class TestInvestmentMarket(TestCase):
         status_code, response_dict = issue_stock(self.bank_teller_token, "招商银行", '2021-3-30', 15)
         self.stock_id = response_dict['stock_id']
 
+        status_code, response_dict = issue_regular_deposit(self.bank_teller_token, "定期理财二号", '2021-3-9', 9, 0.07)
+        self.regular_deposit_id = response_dict['regular_deposit_id']
+
     def test_issue_fund(self):
         fund_name = "基金一号"
         # 正确发行基金测试
@@ -171,6 +174,11 @@ class TestInvestmentMarket(TestCase):
         self.assertEqual(1, len(response_dict))
 
     def test_query_regular_deposits(self):
+        # 正确查询股票测试
+        status_code, response_dict = query_regular_deposits(self.regular_deposit_id)
+        self.assertEqual(200, status_code)
+        self.assertEqual(self.fund_id, response_dict["regular_deposit_id"])
+
         # 定期理财不存在测试
         status_code, response_dict = query_regular_deposits(-2)
         self.assertEqual(404, status_code)
