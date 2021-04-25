@@ -20,18 +20,6 @@ class TestAccount(TestCase):
         sys_register("登录测试", "imbus123", "柜员四", "13966667777")
 
     def test_bank_teller_register(self):
-        # request = HttpRequest()
-        # request.method = "POST"
-        # request.META = {"CONTENT_TYPE": "application/json"}
-        # request._body = json.dumps({"account": "BTS3", "password": "imbus123", "name": "柜员三", "phone": "13966667777"}).encode("UTF-8")
-        # response = account.bank_teller_register(request)
-        # status_code = response.status_code
-        # response_dict = json.loads(response.content.decode("utf8"))
-
-        # response = self.client.post('http://localhost:8000/bts/system/register',
-        #                             data={"account": "BTS3", "password": "imbus123", "name": "柜员三",
-        #                                   "phone": "13966667777"})
-
         # 正确注册测试
         status_code, response_dict = sys_register("注册测试", "imbus123", "柜员三", "13966667777")
         self.assertEqual(200, status_code)

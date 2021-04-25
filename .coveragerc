@@ -10,4 +10,4 @@ omit=
     */utils/*
 
 [report]
-show_missing = True
+show_missing = Truec
