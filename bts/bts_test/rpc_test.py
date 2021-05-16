@@ -1,6 +1,4 @@
-from bts.bts_test.rpc_utils import do_get_request, do_post_request
-
-from bts.services.system.token import TOKEN_HEADER_KEY
+from bts.bts_test.rpc_utils import do_get_request, do_post_request, TOKEN_HEADER_KEY
 
 
 def sys_register(account: str, password: str, name: str, phone: str = None):
