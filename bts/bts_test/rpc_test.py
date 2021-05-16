@@ -299,7 +299,7 @@ if __name__ == '__main__':
 
     # 给该客户存款200
     new_customer_id = response_dict['customer_id']
-    status_code, response_dict = customer_deposit(bt_token, new_customer_id, 200.0, '2021-3-27')
+    status_code, response_dict = customer_deposit(bt_token, new_customer_id, '2021-3-27', 200.0)
     show_info(status_code, response_dict)
     # 重新查询，存款变为1200
     status_code, response_dict = query_customer_by_id_number(bt_token, '330888855550001')
@@ -352,7 +352,7 @@ if __name__ == '__main__':
     show_info(status_code, response_dict)
 
     # 存入500000，摇身一变变为一级账户
-    status_code, response_dict = customer_deposit(bt_token, new_customer_id, 500000, '2021-4-22')
+    status_code, response_dict = customer_deposit(bt_token, new_customer_id, '2021-4-22', 500000)
     show_info(status_code, response_dict)
 
     # 再次购买股票
