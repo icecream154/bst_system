@@ -41,10 +41,11 @@ def query_customer_by_id_number(token: str, id_number: str = None):
 
 
 # 客户存款
-def customer_deposit(token: str, customer_id: int, new_deposit: float = None):
+def customer_deposit(token: str, customer_id: int, deposit_date: str, new_deposit: float = None):
     if new_deposit is not None:
         return do_post_request('/deposit', headers={TOKEN_HEADER_KEY: token}, data={'customer_id': customer_id,
-                                                                                    'new_deposit': new_deposit})
+                                                                                    'new_deposit': new_deposit,
+                                                                                    'deposit_date': deposit_date})
     else:
         return do_post_request('/deposit', headers={TOKEN_HEADER_KEY: token}, data={'customer_id': customer_id})
 
@@ -298,7 +299,7 @@ if __name__ == '__main__':
 
     # 给该客户存款200
     new_customer_id = response_dict['customer_id']
-    status_code, response_dict = customer_deposit(bt_token, new_customer_id, 200.0)
+    status_code, response_dict = customer_deposit(bt_token, new_customer_id, 200.0, '2021-3-27')
     show_info(status_code, response_dict)
     # 重新查询，存款变为1200
     status_code, response_dict = query_customer_by_id_number(bt_token, '330888855550001')
@@ -347,15 +348,15 @@ if __name__ == '__main__':
     show_info(status_code, response_dict)
 
     # 购买股票,失败，因为不是一级账户
-    status_code, response_dict = buy_stock(bt_token, new_customer_id, new_stock_id, 20, '2021-3-30')
+    status_code, response_dict = buy_stock(bt_token, new_customer_id, new_stock_id, 20, '2021-4-21')
     show_info(status_code, response_dict)
 
     # 存入500000，摇身一变变为一级账户
-    status_code, response_dict = customer_deposit(bt_token, new_customer_id, 500000)
+    status_code, response_dict = customer_deposit(bt_token, new_customer_id, 500000, '2021-4-22')
     show_info(status_code, response_dict)
 
     # 再次购买股票
-    status_code, response_dict = buy_stock(bt_token, new_customer_id, new_stock_id, 20, '2021-3-30')
+    status_code, response_dict = buy_stock(bt_token, new_customer_id, new_stock_id, 20, '2021-4-23')
     show_info(status_code, response_dict)
 
     # 重新查询，存款变为500700, 定期200加股票300共用去500
